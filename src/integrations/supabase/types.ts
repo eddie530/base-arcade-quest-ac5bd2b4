@@ -169,17 +169,18 @@ export type Database = {
       }
     }
     Views: {
-      leaderboard: {
-        Row: {
-          streak: number | null
-          user_id: string | null
-          username: string | null
-          xp: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_leaderboard: {
+        Args: never
+        Returns: {
+          streak: number
+          user_id: string
+          username: string
+          xp: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
