@@ -14,16 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      flips: {
+        Row: {
+          created_at: string
+          guess: string
+          id: string
+          result: string
+          user_id: string
+          won: boolean
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          guess: string
+          id?: string
+          result: string
+          user_id: string
+          won: boolean
+          xp: number
+        }
+        Update: {
+          created_at?: string
+          guess?: string
+          id?: string
+          result?: string
+          user_id?: string
+          won?: boolean
+          xp?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          last_claim_at: string | null
+          referral_code: string
+          referred_by: string | null
+          streak: number
+          updated_at: string
+          user_id: string
+          username: string | null
+          wallet_address: string | null
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          last_claim_at?: string | null
+          referral_code?: string
+          referred_by?: string | null
+          streak?: number
+          updated_at?: string
+          user_id: string
+          username?: string | null
+          wallet_address?: string | null
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          last_claim_at?: string | null
+          referral_code?: string
+          referred_by?: string | null
+          streak?: number
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+          wallet_address?: string | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
+      spins: {
+        Row: {
+          created_at: string
+          id: string
+          reward: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reward: string
+          user_id: string
+          xp: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reward?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          badge: string
+          earned_at: string
+          user_id: string
+        }
+        Insert: {
+          badge: string
+          earned_at?: string
+          user_id: string
+        }
+        Update: {
+          badge?: string
+          earned_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +308,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
