@@ -209,13 +209,9 @@ export const getLeaderboard = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const { data } = await supabase
-      .from("profiles")
-      .select("user_id, username, wallet_address, xp, streak")
-      .order("xp", { ascending: false })
-      .limit(100);
+    const { data } = await supabase.rpc("get_leaderboard");
     const rows = data ?? [];
-    const myIndex = rows.findIndex((r: any) => r.user_id === userId);
+    const myIndex = rows.findIndex((r: { user_id: string }) => r.user_id === userId);
     return { rows, myRank: myIndex >= 0 ? myIndex + 1 : null };
   });
 
