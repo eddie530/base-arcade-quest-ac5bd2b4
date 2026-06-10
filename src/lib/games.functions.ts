@@ -2,35 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-// ============================================================================
-// Reward tables — easy to extend later for tournaments / sponsored campaigns
-// ============================================================================
-
-export type SpinReward = {
-  label: string;
-  xp: number;
-  weight: number;
-  kind: "xp" | "double" | "bonus" | "jackpot";
-};
-
-export const SPIN_REWARDS: SpinReward[] = [
-  { label: "10 XP", xp: 10, weight: 30, kind: "xp" },
-  { label: "25 XP", xp: 25, weight: 22, kind: "xp" },
-  { label: "50 XP", xp: 50, weight: 14, kind: "xp" },
-  { label: "100 XP", xp: 100, weight: 8, kind: "xp" },
-  { label: "Double XP", xp: 75, weight: 12, kind: "double" },
-  { label: "Bonus Spin", xp: 20, weight: 10, kind: "bonus" },
-  { label: "JACKPOT", xp: 1000, weight: 4, kind: "jackpot" },
-];
-
-function pickWeighted<T extends { weight: number }>(items: T[]): T {
-  const total = items.reduce((s, i) => s + i.weight, 0);
-  let r = Math.random() * total;
-  for (const it of items) {
-    if ((r -= it.weight) <= 0) return it;
-  }
-  return items[items.length - 1];
-}
+// Reward weights live in src/lib/games.server.ts so the table never ships
+// to the browser. The client wheel reads label-only data from spin-labels.ts.
 
 const BADGES = {
   first_spin: "First Spin",
@@ -94,8 +67,9 @@ export const updateProfile = createServerFn({ method: "POST" })
       .parse(d)
   )
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase.from("profiles").update(data).eq("user_id", userId);
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("profiles").update(data).eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -127,12 +101,13 @@ export const claimDaily = createServerFn({ method: "POST" })
     const reward = 25 + Math.min(streak * 5, 100);
     const xp = (profile.xp as number) + reward;
 
-    await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("profiles")
       .update({ xp, streak, last_claim_at: now.toISOString() })
       .eq("user_id", userId);
 
-    const badges = await awardBadges(supabase, userId, { xp, streak });
+    const badges = await awardBadges(supabaseAdmin, userId, { xp, streak });
     return { ok: true, reward, xp, streak, badges };
   });
 
@@ -146,11 +121,25 @@ export const spin = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("xp, streak")
+      .select("xp, streak, last_spin_at")
       .eq("user_id", userId)
       .single();
     if (!profile) throw new Error("Profile not found");
-    const { count: prevSpins } = await supabase
+
+    // Per-user cooldown: 24h between spins (free DAILY spin). Prevents scripted XP farming.
+    const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    const last = profile.last_spin_at ? new Date(profile.last_spin_at as string) : null;
+    if (last) {
+      const elapsed = Date.now() - last.getTime();
+      if (elapsed < SPIN_COOLDOWN_MS) {
+        const hoursLeft = Math.ceil((SPIN_COOLDOWN_MS - elapsed) / 3_600_000);
+        return { ok: false as const, cooldown: true as const, hoursLeft };
+      }
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { SPIN_REWARDS, pickWeighted } = await import("@/lib/games.server");
+    const { count: prevSpins } = await supabaseAdmin
       .from("spins")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId);
@@ -159,14 +148,17 @@ export const spin = createServerFn({ method: "POST" })
     const rewardIndex = SPIN_REWARDS.indexOf(reward);
     const newXp = (profile.xp as number) + reward.xp;
 
-    await supabase.from("spins").insert({ user_id: userId, reward: reward.label, xp: reward.xp });
-    await supabase.from("profiles").update({ xp: newXp }).eq("user_id", userId);
-    const badges = await awardBadges(supabase, userId, {
+    await supabaseAdmin.from("spins").insert({ user_id: userId, reward: reward.label, xp: reward.xp });
+    await supabaseAdmin
+      .from("profiles")
+      .update({ xp: newXp, last_spin_at: new Date().toISOString() })
+      .eq("user_id", userId);
+    const badges = await awardBadges(supabaseAdmin, userId, {
       xp: newXp,
       streak: profile.streak as number,
       firstSpin: (prevSpins ?? 0) === 0,
     });
-    return { reward, rewardIndex, xp: newXp, badges };
+    return { ok: true as const, reward, rewardIndex, xp: newXp, badges };
   });
 
 // ============================================================================
@@ -182,23 +174,40 @@ export const flip = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("xp, streak")
+      .select("xp, streak, last_flip_at")
       .eq("user_id", userId)
       .single();
     if (!profile) throw new Error("Profile not found");
+
+    // Per-user cooldown: 5s between flips. Caps farming throughput without
+    // breaking the rhythm of a quick game.
+    const FLIP_COOLDOWN_MS = 5_000;
+    const last = profile.last_flip_at ? new Date(profile.last_flip_at as string) : null;
+    if (last) {
+      const elapsed = Date.now() - last.getTime();
+      if (elapsed < FLIP_COOLDOWN_MS) {
+        const secondsLeft = Math.ceil((FLIP_COOLDOWN_MS - elapsed) / 1000);
+        return { ok: false as const, cooldown: true as const, secondsLeft };
+      }
+    }
+
     const result: "heads" | "tails" = Math.random() < 0.5 ? "heads" : "tails";
     const won = result === data.guess;
     const xpDelta = won ? 30 : 5;
     const newXp = (profile.xp as number) + xpDelta;
-    await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("flips")
       .insert({ user_id: userId, guess: data.guess, result, won, xp: xpDelta });
-    await supabase.from("profiles").update({ xp: newXp }).eq("user_id", userId);
-    const badges = await awardBadges(supabase, userId, {
+    await supabaseAdmin
+      .from("profiles")
+      .update({ xp: newXp, last_flip_at: new Date().toISOString() })
+      .eq("user_id", userId);
+    const badges = await awardBadges(supabaseAdmin, userId, {
       xp: newXp,
       streak: profile.streak as number,
     });
-    return { result, won, xp: newXp, xpDelta, badges };
+    return { ok: true as const, result, won, xp: newXp, xpDelta, badges };
   });
 
 // ============================================================================

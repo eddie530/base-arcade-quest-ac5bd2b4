@@ -1,36 +1,30 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { adminListUsers, adminUpdateUser, getMyProfile } from "@/lib/games.functions";
 import { toast } from "sonner";
 import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/admin")({
   head: () => ({ meta: [{ title: "Admin — Resident Arcade" }] }),
+  // Server-side gate: verify admin role before the route renders.
+  // The server fn re-checks via assertAdmin — this is defense in depth.
+  beforeLoad: async () => {
+    const profile = await getMyProfile();
+    if (!profile?.isAdmin) throw redirect({ to: "/app" });
+  },
   component: Admin,
 });
 
 function Admin() {
-  const router = useRouter();
-  const me = useServerFn(getMyProfile);
   const list = useServerFn(adminListUsers);
   const update = useServerFn(adminUpdateUser);
   const qc = useQueryClient();
 
-  const { data: meData } = useQuery({ queryKey: ["me"], queryFn: () => me() });
-
-  useEffect(() => {
-    if (meData && !meData.isAdmin) {
-      toast.error("Admins only");
-      router.navigate({ to: "/app" });
-    }
-  }, [meData, router]);
-
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: () => list(),
-    enabled: !!meData?.isAdmin,
   });
 
   const mut = useMutation({
@@ -61,8 +55,6 @@ function Admin() {
     a.download = "resident-arcade-users.csv";
     a.click();
   };
-
-  if (!meData?.isAdmin) return <div className="text-center text-muted-foreground py-12">Checking access…</div>;
 
   return (
     <div className="space-y-4">

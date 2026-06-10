@@ -23,6 +23,11 @@ function FlipPage() {
     mutationFn: (guess: "heads" | "tails") => flipFn({ data: { guess } }),
     onMutate: () => setBusy(true),
     onSuccess: (r: any) => {
+      if (r?.ok === false && r?.cooldown) {
+        setBusy(false);
+        toast.error(`Slow down — flip again in ${r.secondsLeft}s`);
+        return;
+      }
       // spin 6 full turns + land on result (heads = 0, tails = 180)
       const targetSide = r.result === "heads" ? 0 : 180;
       const next = rot + 360 * 6 + (targetSide - (rot % 360) + 360) % 360;

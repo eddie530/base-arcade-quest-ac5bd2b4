@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { spin, SPIN_REWARDS } from "@/lib/games.functions";
+import { spin } from "@/lib/games.functions";
+import { SPIN_SLICES, type SpinSlice } from "@/lib/spin-labels";
 import { toast } from "sonner";
 import { Sparkles, X } from "lucide-react";
 
@@ -30,12 +31,17 @@ function SpinPage() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  const sliceAngle = 360 / SPIN_REWARDS.length;
+  const sliceAngle = 360 / SPIN_SLICES.length;
 
   const mut = useMutation({
     mutationFn: () => spinFn(),
     onMutate: () => setSpinning(true),
     onSuccess: (r: any) => {
+      if (r?.ok === false && r?.cooldown) {
+        setSpinning(false);
+        toast.error(`Daily spin used — back in ${r.hoursLeft}h`);
+        return;
+      }
       // land the index at top (pointer is at top, slice center at -90deg + i*sliceAngle)
       const target = 360 * 6 + (360 - r.rewardIndex * sliceAngle - sliceAngle / 2);
       setRotation((prev) => prev + target);
@@ -74,7 +80,7 @@ function SpinPage() {
           transition={{ duration: 4, ease: [0.16, 1, 0.3, 1] }}
         >
           <svg viewBox="0 0 200 200" className="w-full h-full">
-            {SPIN_REWARDS.map((r, i) => {
+            {SPIN_SLICES.map((r: SpinSlice, i: number) => {
               const start = i * sliceAngle - 90;
               const end = start + sliceAngle;
               const x1 = 100 + 100 * Math.cos((start * Math.PI) / 180);
