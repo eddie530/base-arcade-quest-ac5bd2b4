@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_wallets: {
+        Row: {
+          created_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       flips: {
         Row: {
           created_at: string
@@ -193,6 +208,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_xp: {
+        Args: { _delta: number; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

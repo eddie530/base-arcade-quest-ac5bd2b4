@@ -48,12 +48,9 @@ export const getMyProfile = createServerFn({ method: "GET" })
       .from("user_achievements")
       .select("badge, earned_at")
       .eq("user_id", userId);
-    const { data: roleRow } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const isAdmin = (roleRow ?? []).some((r: any) => r.role === "admin");
-    return { profile, badges: badges ?? [], isAdmin };
+    const { data: isAdmin } = await supabase
+      .rpc("has_role", { _user_id: userId, _role: "admin" });
+    return { profile, badges: badges ?? [], isAdmin: !!isAdmin };
   });
 
 export const updateProfile = createServerFn({ method: "POST" })
@@ -258,20 +255,8 @@ export const applyReferral = createServerFn({ method: "POST" })
       referred_id: userId,
     });
     await supabaseAdmin.from("profiles").update({ referred_by: referrer.user_id }).eq("user_id", userId);
-    await supabaseAdmin.rpc; // noop, placeholder for future
-    await supabaseAdmin
-      .from("profiles")
-      .update({ xp: (referrer.xp as number) + REWARD })
-      .eq("user_id", referrer.user_id);
-    const { data: meProf } = await supabaseAdmin
-      .from("profiles")
-      .select("xp")
-      .eq("user_id", userId)
-      .single();
-    await supabaseAdmin
-      .from("profiles")
-      .update({ xp: (meProf?.xp as number) + REWARD })
-      .eq("user_id", userId);
+    await supabaseAdmin.rpc("increment_xp", { _user_id: referrer.user_id, _delta: REWARD });
+    await supabaseAdmin.rpc("increment_xp", { _user_id: userId, _delta: REWARD });
     return { ok: true, reward: REWARD };
   });
 

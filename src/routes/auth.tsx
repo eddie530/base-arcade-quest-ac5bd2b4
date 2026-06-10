@@ -26,14 +26,31 @@ function AuthPage() {
       if (data.user) router.navigate({ to: "/app" });
     });
     if (typeof window !== "undefined") {
-      const ref = new URLSearchParams(window.location.search).get("ref");
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("ref");
       if (ref) localStorage.setItem("ra_ref", ref);
+      // Verify OAuth state on callback
+      const state = params.get("state");
+      const savedState = sessionStorage.getItem("ra_oauth_state");
+      if (state && savedState && state !== savedState) {
+        toast.error("Invalid OAuth state. Please try again.");
+        sessionStorage.removeItem("ra_oauth_state");
+        return;
+      }
+      if (state && savedState) {
+        sessionStorage.removeItem("ra_oauth_state");
+      }
     }
   }, [router]);
 
   const google = async () => {
     setLoading(true);
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    const state = crypto.randomUUID();
+    sessionStorage.setItem("ra_oauth_state", state);
+    const r = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app",
+      extraParams: { state },
+    });
     if (r.error) toast.error(r.error.message);
     if (!r.redirected && !r.error) router.navigate({ to: "/app" });
     setLoading(false);
