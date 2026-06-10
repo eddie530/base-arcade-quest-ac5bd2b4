@@ -209,6 +209,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_xp: {
+        Args: { _delta: number; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
