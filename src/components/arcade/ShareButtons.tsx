@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { Share2, Users, Flame } from "lucide-react";
-import { APP_URL, shareUrl, warpcastCompose } from "@/lib/farcaster";
+import { shareUrl, warpcastCompose } from "@/lib/farcaster";
 
 export function ShareButtons({
   xp,
