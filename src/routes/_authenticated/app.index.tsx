@@ -14,7 +14,7 @@ import { WalletButton } from "@/components/arcade/WalletButton";
 import { toast } from "sonner";
 import { Flame, Gift, Sparkles, Trophy, CircleDot, Gamepad2, Copy, Check, Pencil } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/app")({ component: Dashboard });
+export const Route = createFileRoute("/_authenticated/app/")({ component: Dashboard });
 
 function Dashboard() {
   const qc = useQueryClient();
