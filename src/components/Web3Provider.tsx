@@ -11,7 +11,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    import("@/lib/wallet.client").then((m) => {
+    import("@/lib/wallet").then((m) => {
       if (mounted) setConfig(m.wagmiConfig);
     });
     return () => {
