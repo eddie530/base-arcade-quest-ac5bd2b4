@@ -48,6 +48,7 @@ export type Database = {
         Row: {
           created_at: string
           last_claim_at: string | null
+          last_flip_at: string | null
           last_spin_at: string | null
           referral_code: string
           referred_by: string | null
@@ -61,6 +62,7 @@ export type Database = {
         Insert: {
           created_at?: string
           last_claim_at?: string | null
+          last_flip_at?: string | null
           last_spin_at?: string | null
           referral_code?: string
           referred_by?: string | null
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           created_at?: string
           last_claim_at?: string | null
+          last_flip_at?: string | null
           last_spin_at?: string | null
           referral_code?: string
           referred_by?: string | null
