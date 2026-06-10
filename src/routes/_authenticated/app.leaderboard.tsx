@@ -44,9 +44,6 @@ function Leaderboard() {
             </div>
             <div className="min-w-0">
               <div className="font-semibold truncate">{row.username ?? "Player"}</div>
-              <div className="font-mono text-[10px] text-muted-foreground truncate">
-                {row.wallet_address ?? "—"}
-              </div>
             </div>
             <div className="text-right font-mono tabular-nums font-bold">{row.xp.toLocaleString()}</div>
             <div className="text-right font-mono tabular-nums text-muted-foreground flex items-center justify-end gap-1">
