@@ -126,18 +126,19 @@ export const spin = createServerFn({ method: "POST" })
       .single();
     if (!profile) throw new Error("Profile not found");
 
-    // Per-user cooldown: 30s between spins. Prevents scripted XP farming.
-    const SPIN_COOLDOWN_MS = 30_000;
+    // Per-user cooldown: 24h between spins (free DAILY spin). Prevents scripted XP farming.
+    const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
     const last = profile.last_spin_at ? new Date(profile.last_spin_at as string) : null;
     if (last) {
       const elapsed = Date.now() - last.getTime();
       if (elapsed < SPIN_COOLDOWN_MS) {
-        const secondsLeft = Math.ceil((SPIN_COOLDOWN_MS - elapsed) / 1000);
-        return { ok: false as const, cooldown: true as const, secondsLeft };
+        const hoursLeft = Math.ceil((SPIN_COOLDOWN_MS - elapsed) / 3_600_000);
+        return { ok: false as const, cooldown: true as const, hoursLeft };
       }
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { SPIN_REWARDS, pickWeighted } = await import("@/lib/games.server");
     const { count: prevSpins } = await supabaseAdmin
       .from("spins")
       .select("id", { count: "exact", head: true })
