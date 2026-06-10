@@ -94,8 +94,9 @@ export const updateProfile = createServerFn({ method: "POST" })
       .parse(d)
   )
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
-    const { error } = await supabase.from("profiles").update(data).eq("user_id", userId);
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("profiles").update(data).eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -127,12 +128,13 @@ export const claimDaily = createServerFn({ method: "POST" })
     const reward = 25 + Math.min(streak * 5, 100);
     const xp = (profile.xp as number) + reward;
 
-    await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("profiles")
       .update({ xp, streak, last_claim_at: now.toISOString() })
       .eq("user_id", userId);
 
-    const badges = await awardBadges(supabase, userId, { xp, streak });
+    const badges = await awardBadges(supabaseAdmin, userId, { xp, streak });
     return { ok: true, reward, xp, streak, badges };
   });
 
@@ -146,11 +148,24 @@ export const spin = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("xp, streak")
+      .select("xp, streak, last_spin_at")
       .eq("user_id", userId)
       .single();
     if (!profile) throw new Error("Profile not found");
-    const { count: prevSpins } = await supabase
+
+    // Per-user cooldown: 30s between spins. Prevents scripted XP farming.
+    const SPIN_COOLDOWN_MS = 30_000;
+    const last = profile.last_spin_at ? new Date(profile.last_spin_at as string) : null;
+    if (last) {
+      const elapsed = Date.now() - last.getTime();
+      if (elapsed < SPIN_COOLDOWN_MS) {
+        const secondsLeft = Math.ceil((SPIN_COOLDOWN_MS - elapsed) / 1000);
+        return { ok: false as const, cooldown: true as const, secondsLeft };
+      }
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count: prevSpins } = await supabaseAdmin
       .from("spins")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId);
@@ -159,14 +174,17 @@ export const spin = createServerFn({ method: "POST" })
     const rewardIndex = SPIN_REWARDS.indexOf(reward);
     const newXp = (profile.xp as number) + reward.xp;
 
-    await supabase.from("spins").insert({ user_id: userId, reward: reward.label, xp: reward.xp });
-    await supabase.from("profiles").update({ xp: newXp }).eq("user_id", userId);
-    const badges = await awardBadges(supabase, userId, {
+    await supabaseAdmin.from("spins").insert({ user_id: userId, reward: reward.label, xp: reward.xp });
+    await supabaseAdmin
+      .from("profiles")
+      .update({ xp: newXp, last_spin_at: new Date().toISOString() })
+      .eq("user_id", userId);
+    const badges = await awardBadges(supabaseAdmin, userId, {
       xp: newXp,
       streak: profile.streak as number,
       firstSpin: (prevSpins ?? 0) === 0,
     });
-    return { reward, rewardIndex, xp: newXp, badges };
+    return { ok: true as const, reward, rewardIndex, xp: newXp, badges };
   });
 
 // ============================================================================
@@ -190,11 +208,12 @@ export const flip = createServerFn({ method: "POST" })
     const won = result === data.guess;
     const xpDelta = won ? 30 : 5;
     const newXp = (profile.xp as number) + xpDelta;
-    await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin
       .from("flips")
       .insert({ user_id: userId, guess: data.guess, result, won, xp: xpDelta });
-    await supabase.from("profiles").update({ xp: newXp }).eq("user_id", userId);
-    const badges = await awardBadges(supabase, userId, {
+    await supabaseAdmin.from("profiles").update({ xp: newXp }).eq("user_id", userId);
+    const badges = await awardBadges(supabaseAdmin, userId, {
       xp: newXp,
       streak: profile.streak as number,
     });
