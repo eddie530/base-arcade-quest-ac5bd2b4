@@ -36,6 +36,11 @@ function SpinPage() {
     mutationFn: () => spinFn(),
     onMutate: () => setSpinning(true),
     onSuccess: (r: any) => {
+      if (r?.ok === false && r?.cooldown) {
+        setSpinning(false);
+        toast.error(`Spin cooldown — try again in ${r.secondsLeft}s`);
+        return;
+      }
       // land the index at top (pointer is at top, slice center at -90deg + i*sliceAngle)
       const target = 360 * 6 + (360 - r.rewardIndex * sliceAngle - sliceAngle / 2);
       setRotation((prev) => prev + target);
