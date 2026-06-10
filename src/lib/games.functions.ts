@@ -48,12 +48,9 @@ export const getMyProfile = createServerFn({ method: "GET" })
       .from("user_achievements")
       .select("badge, earned_at")
       .eq("user_id", userId);
-    const { data: roleRow } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    const isAdmin = (roleRow ?? []).some((r: any) => r.role === "admin");
-    return { profile, badges: badges ?? [], isAdmin };
+    const { data: isAdmin } = await supabase
+      .rpc("has_role", { _user_id: userId, _role: "admin" });
+    return { profile, badges: badges ?? [], isAdmin: !!isAdmin };
   });
 
 export const updateProfile = createServerFn({ method: "POST" })

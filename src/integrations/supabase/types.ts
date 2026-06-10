@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_wallets: {
+        Row: {
+          created_at: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       flips: {
         Row: {
           created_at: string
