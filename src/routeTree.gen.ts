@@ -13,6 +13,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
+import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
+import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
+import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -33,15 +37,44 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppSpinRoute = AuthenticatedAppSpinRouteImport.update({
+  id: '/app/spin',
+  path: '/app/spin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppLeaderboardRoute =
+  AuthenticatedAppLeaderboardRouteImport.update({
+    id: '/app/leaderboard',
+    path: '/app/leaderboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppFlipRoute = AuthenticatedAppFlipRouteImport.update({
+  id: '/app/flip',
+  path: '/app/flip',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/app/admin',
+  path: '/app/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/flip': typeof AuthenticatedAppFlipRoute
+  '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/flip': typeof AuthenticatedAppFlipRoute
+  '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -49,14 +82,41 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
+  '/_authenticated/app/flip': typeof AuthenticatedAppFlipRoute
+  '/_authenticated/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/_authenticated/app/spin': typeof AuthenticatedAppSpinRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app/admin'
+    | '/app/flip'
+    | '/app/leaderboard'
+    | '/app/spin'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/app/'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/admin'
+    | '/app/flip'
+    | '/app/leaderboard'
+    | '/app/spin'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/app/admin'
+    | '/_authenticated/app/flip'
+    | '/_authenticated/app/leaderboard'
+    | '/_authenticated/app/spin'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,14 +155,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/spin': {
+      id: '/_authenticated/app/spin'
+      path: '/app/spin'
+      fullPath: '/app/spin'
+      preLoaderRoute: typeof AuthenticatedAppSpinRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/leaderboard': {
+      id: '/_authenticated/app/leaderboard'
+      path: '/app/leaderboard'
+      fullPath: '/app/leaderboard'
+      preLoaderRoute: typeof AuthenticatedAppLeaderboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/flip': {
+      id: '/_authenticated/app/flip'
+      path: '/app/flip'
+      fullPath: '/app/flip'
+      preLoaderRoute: typeof AuthenticatedAppFlipRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/app/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
+  AuthenticatedAppFlipRoute: typeof AuthenticatedAppFlipRoute
+  AuthenticatedAppLeaderboardRoute: typeof AuthenticatedAppLeaderboardRoute
+  AuthenticatedAppSpinRoute: typeof AuthenticatedAppSpinRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
+  AuthenticatedAppFlipRoute: AuthenticatedAppFlipRoute,
+  AuthenticatedAppLeaderboardRoute: AuthenticatedAppLeaderboardRoute,
+  AuthenticatedAppSpinRoute: AuthenticatedAppSpinRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
