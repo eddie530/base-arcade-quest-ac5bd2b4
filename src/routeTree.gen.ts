@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShareKindRouteImport } from './routes/share.$kind'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
 import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
@@ -30,6 +31,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShareKindRoute = ShareKindRouteImport.update({
+  id: '/share/$kind',
+  path: '/share/$kind',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
@@ -62,6 +68,7 @@ const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/share/$kind': typeof ShareKindRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/share/$kind': typeof ShareKindRoute
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/share/$kind': typeof ShareKindRoute
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/flip': typeof AuthenticatedAppFlipRoute
   '/_authenticated/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
@@ -93,6 +102,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/share/$kind'
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/share/$kind'
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/share/$kind'
     | '/_authenticated/app/admin'
     | '/_authenticated/app/flip'
     | '/_authenticated/app/leaderboard'
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ShareKindRoute: typeof ShareKindRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,6 +159,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/share/$kind': {
+      id: '/share/$kind'
+      path: '/share/$kind'
+      fullPath: '/share/$kind'
+      preLoaderRoute: typeof ShareKindRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
@@ -209,17 +229,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ShareKindRoute: ShareKindRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
