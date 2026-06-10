@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { miniAppMeta, shareImageUrl } from "@/lib/farcaster";
 
 function NotFoundComponent() {
   return (
@@ -84,7 +85,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Resident Arcade" },
       { property: "og:description", content: "Play. Earn. Flex. Built on Base." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: shareImageUrl("score") },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: shareImageUrl("score") },
+      ...miniAppMeta({
+        imageUrl: shareImageUrl("score"),
+        buttonTitle: "🎮 Launch Arcade",
+      }),
     ],
     links: [
       {

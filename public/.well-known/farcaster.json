@@ -1,0 +1,18 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "Resident Arcade",
+    "iconUrl": "https://base-arcade-quest.lovable.app/frames/icon.png",
+    "homeUrl": "https://base-arcade-quest.lovable.app/app",
+    "splashImageUrl": "https://base-arcade-quest.lovable.app/frames/icon.png",
+    "splashBackgroundColor": "#0a0e1a",
+    "subtitle": "Play. Earn. Flex.",
+    "description": "A Base-native arcade for the Farcaster era. Spin, flip, streak, climb.",
+    "primaryCategory": "games",
+    "tags": ["base", "arcade", "games", "xp", "streak"],
+    "heroImageUrl": "https://base-arcade-quest.lovable.app/frames/score.png",
+    "ogTitle": "Resident Arcade",
+    "ogDescription": "Play. Earn. Flex. Built on Base.",
+    "ogImageUrl": "https://base-arcade-quest.lovable.app/frames/score.png"
+  }
+}
