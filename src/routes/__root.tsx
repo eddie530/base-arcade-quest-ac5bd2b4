@@ -82,8 +82,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Resident Arcade — Play. Earn. Flex." },
       { name: "description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
-      { property: "og:title", content: "Resident Arcade" },
-      { property: "og:description", content: "Play. Earn. Flex. Built on Base." },
+      { property: "og:title", content: "Resident Arcade — Play. Earn. Flex." },
+      { property: "og:description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
       { property: "og:type", content: "website" },
       { property: "og:image", content: shareImageUrl("score") },
       { name: "twitter:card", content: "summary_large_image" },
@@ -92,6 +92,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         imageUrl: shareImageUrl("score"),
         buttonTitle: "🎮 Launch Arcade",
       }),
+      { name: "twitter:title", content: "Resident Arcade — Play. Earn. Flex." },
+      { name: "twitter:description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a5b9eb2-6567-4c6b-a994-2893eb520304" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/5a5b9eb2-6567-4c6b-a994-2893eb520304" },
     ],
     links: [
       {
