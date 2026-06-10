@@ -169,7 +169,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          streak: number | null
+          user_id: string | null
+          username: string | null
+          xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
