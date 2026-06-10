@@ -1,6 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import {
+  SPIN_COOLDOWN_MS,
+  FLIP_COOLDOWN_MS,
+  REFERRAL_REWARD_XP,
+  checkCooldown,
+  computeDailyClaim,
+  flipXp,
+} from "@/lib/games.logic";
 
 // Reward weights live in src/lib/games.server.ts so the table never ships
 // to the browser. The client wheel reads label-only data from spin-labels.ts.
@@ -88,15 +96,14 @@ export const claimDaily = createServerFn({ method: "POST" })
 
     const now = new Date();
     const last = profile.last_claim_at ? new Date(profile.last_claim_at as string) : null;
-    if (last) {
-      const hours = (now.getTime() - last.getTime()) / 36e5;
-      if (hours < 24)
-        return { ok: false, hoursLeft: Math.ceil(24 - hours), message: "Come back later" };
-    }
-    const continued = last && (now.getTime() - last.getTime()) / 36e5 < 48;
-    const streak = continued ? (profile.streak as number) + 1 : 1;
-    const reward = 25 + Math.min(streak * 5, 100);
-    const xp = (profile.xp as number) + reward;
+    const result = computeDailyClaim({
+      now,
+      lastClaimAt: last,
+      currentXp: profile.xp as number,
+      currentStreak: profile.streak as number,
+    });
+    if (!result.ok) return { ok: false, hoursLeft: result.hoursLeft, message: "Come back later" };
+    const { reward, streak, xp } = result;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
@@ -123,15 +130,12 @@ export const spin = createServerFn({ method: "POST" })
       .single();
     if (!profile) throw new Error("Profile not found");
 
-    // Per-user cooldown: 24h between spins (free DAILY spin). Prevents scripted XP farming.
-    const SPIN_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    // Per-user 24h cooldown (free DAILY spin). Prevents scripted XP farming.
     const last = profile.last_spin_at ? new Date(profile.last_spin_at as string) : null;
-    if (last) {
-      const elapsed = Date.now() - last.getTime();
-      if (elapsed < SPIN_COOLDOWN_MS) {
-        const hoursLeft = Math.ceil((SPIN_COOLDOWN_MS - elapsed) / 3_600_000);
-        return { ok: false as const, cooldown: true as const, hoursLeft };
-      }
+    const cd = checkCooldown(new Date(), last, SPIN_COOLDOWN_MS);
+    if (!cd.ok) {
+      const hoursLeft = Math.ceil(cd.remainingMs / 3_600_000);
+      return { ok: false as const, cooldown: true as const, hoursLeft };
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -176,21 +180,17 @@ export const flip = createServerFn({ method: "POST" })
       .single();
     if (!profile) throw new Error("Profile not found");
 
-    // Per-user cooldown: 5s between flips. Caps farming throughput without
-    // breaking the rhythm of a quick game.
-    const FLIP_COOLDOWN_MS = 5_000;
+    // Per-user 5s cooldown — caps farming throughput without breaking flow.
     const last = profile.last_flip_at ? new Date(profile.last_flip_at as string) : null;
-    if (last) {
-      const elapsed = Date.now() - last.getTime();
-      if (elapsed < FLIP_COOLDOWN_MS) {
-        const secondsLeft = Math.ceil((FLIP_COOLDOWN_MS - elapsed) / 1000);
-        return { ok: false as const, cooldown: true as const, secondsLeft };
-      }
+    const cd = checkCooldown(new Date(), last, FLIP_COOLDOWN_MS);
+    if (!cd.ok) {
+      const secondsLeft = Math.ceil(cd.remainingMs / 1000);
+      return { ok: false as const, cooldown: true as const, secondsLeft };
     }
 
     const result: "heads" | "tails" = Math.random() < 0.5 ? "heads" : "tails";
     const won = result === data.guess;
-    const xpDelta = won ? 30 : 5;
+    const xpDelta = flipXp(won);
     const newXp = (profile.xp as number) + xpDelta;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
@@ -248,7 +248,7 @@ export const applyReferral = createServerFn({ method: "POST" })
     if (!referrer) return { ok: false, message: "Invalid code" };
     if (referrer.user_id === userId) return { ok: false, message: "Cannot refer yourself" };
 
-    const REWARD = 200;
+    const REWARD = REFERRAL_REWARD_XP;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("referrals").insert({
       referrer_id: referrer.user_id,
