@@ -174,10 +174,23 @@ export const flip = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("xp, streak")
+      .select("xp, streak, last_flip_at")
       .eq("user_id", userId)
       .single();
     if (!profile) throw new Error("Profile not found");
+
+    // Per-user cooldown: 5s between flips. Caps farming throughput without
+    // breaking the rhythm of a quick game.
+    const FLIP_COOLDOWN_MS = 5_000;
+    const last = profile.last_flip_at ? new Date(profile.last_flip_at as string) : null;
+    if (last) {
+      const elapsed = Date.now() - last.getTime();
+      if (elapsed < FLIP_COOLDOWN_MS) {
+        const secondsLeft = Math.ceil((FLIP_COOLDOWN_MS - elapsed) / 1000);
+        return { ok: false as const, cooldown: true as const, secondsLeft };
+      }
+    }
+
     const result: "heads" | "tails" = Math.random() < 0.5 ? "heads" : "tails";
     const won = result === data.guess;
     const xpDelta = won ? 30 : 5;
@@ -186,12 +199,15 @@ export const flip = createServerFn({ method: "POST" })
     await supabaseAdmin
       .from("flips")
       .insert({ user_id: userId, guess: data.guess, result, won, xp: xpDelta });
-    await supabaseAdmin.from("profiles").update({ xp: newXp }).eq("user_id", userId);
+    await supabaseAdmin
+      .from("profiles")
+      .update({ xp: newXp, last_flip_at: new Date().toISOString() })
+      .eq("user_id", userId);
     const badges = await awardBadges(supabaseAdmin, userId, {
       xp: newXp,
       streak: profile.streak as number,
     });
-    return { result, won, xp: newXp, xpDelta, badges };
+    return { ok: true as const, result, won, xp: newXp, xpDelta, badges };
   });
 
 // ============================================================================
