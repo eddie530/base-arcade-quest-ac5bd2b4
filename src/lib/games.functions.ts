@@ -306,7 +306,7 @@ export const adminUpdateUser = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const update: Record<string, unknown> = {};
+    const update: { xp?: number; streak?: number } = {};
     if (data.xp !== undefined) update.xp = data.xp;
     if (data.streak !== undefined) update.streak = data.streak;
     await supabaseAdmin.from("profiles").update(update).eq("user_id", data.user_id);

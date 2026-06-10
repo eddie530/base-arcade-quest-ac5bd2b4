@@ -9,7 +9,7 @@ export const wagmiConfig = createConfig({
   connectors: [
     coinbaseWallet({
       appName: "Resident Arcade",
-      preference: "smartWalletOnly",
+      preference: { options: "smartWalletOnly" },
     }),
     injected({ shimDisconnect: true }),
   ],
