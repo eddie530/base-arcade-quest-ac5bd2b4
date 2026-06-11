@@ -9,7 +9,21 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Resident Arcade" },
-      { name: "description", content: "Play. Earn. Flex. Sign in to Resident Arcade." },
+      {
+        name: "description",
+        content:
+          "Sign in to Resident Arcade to play instant Base-native games, earn XP, build daily streaks, and climb the leaderboard.",
+      },
+      { property: "og:title", content: "Sign in — Resident Arcade" },
+      {
+        property: "og:description",
+        content:
+          "Sign in to Resident Arcade and start earning XP on Base. Daily streaks, instant games, leaderboards.",
+      },
+      { property: "og:url", content: "https://base-arcade-quest.lovable.app/auth" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/auth" },
     ],
   }),
   component: AuthPage,
@@ -71,7 +85,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
+        <Link to="/" aria-label="Resident Arcade home" className="flex items-center justify-center gap-2 mb-8">
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--gradient-neon)] shadow-[var(--shadow-glow)] animate-float">
             <Gamepad2 className="h-6 w-6 text-background" />
           </span>
