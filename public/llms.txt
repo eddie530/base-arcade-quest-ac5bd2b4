@@ -1,0 +1,13 @@
+# Resident Arcade
+
+> A Base-native arcade for the Farcaster era. Play quick games, earn XP, build daily streaks, and climb global leaderboards.
+
+Resident Arcade is a web app on Base. Players sign in, connect a Coinbase Smart Wallet, and play instant games (Lucky Spin, Coin Flip) to earn XP and badges. Daily streaks multiply rewards. Built as a Farcaster Mini App.
+
+## Pages
+
+- [Home](/): Landing page — what Resident Arcade is and how to start.
+- [Sign in](/auth): Sign in or create an account with Google or email.
+- [Share a score](/share/score): Open Graph / Farcaster share card for a player's XP.
+- [Share a streak](/share/streak): Share card for a player's daily streak.
+- [Challenge a friend](/share/challenge): Referral-friendly invite share card.

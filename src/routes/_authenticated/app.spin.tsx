@@ -137,7 +137,7 @@ function SpinPage() {
           onClick={() => setResult(null)}
         >
           <div className="glass-strong rounded-3xl p-8 max-w-sm w-full text-center relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setResult(null)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
+            <button onClick={() => setResult(null)} aria-label="Close result" className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
             </button>
             <div className="text-xs uppercase tracking-widest text-muted-foreground">You landed on</div>

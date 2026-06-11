@@ -18,6 +18,32 @@ export const Route = createFileRoute("/")({
           "Daily streaks, instant games, leaderboards. Connect your Base Smart Wallet.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://base-arcade-quest.lovable.app/" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Resident Arcade",
+          url: "https://base-arcade-quest.lovable.app/",
+          logo: "https://base-arcade-quest.lovable.app/frames/icon.png",
+          sameAs: ["https://warpcast.com/"],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Resident Arcade",
+          url: "https://base-arcade-quest.lovable.app/",
+        }),
+      },
     ],
   }),
   component: Landing,
@@ -41,6 +67,7 @@ function Landing() {
         </Link>
       </header>
 
+      <main>
       <section className="mx-auto max-w-5xl px-4 pt-10 pb-16 text-center">
         <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs text-muted-foreground mb-6">
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-green)]" />
@@ -85,6 +112,7 @@ function Landing() {
       </section>
 
       <section id="features" className="mx-auto max-w-5xl px-4 pb-24">
+        <h2 className="sr-only">What's inside</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { Icon: CircleDot, t: "Lucky Spin", d: "Prize wheel with jackpot, double-XP and bonus spin tiers." },
@@ -104,6 +132,7 @@ function Landing() {
           ))}
         </div>
       </section>
+      </main>
 
       <footer className="border-t border-white/5 py-6 text-center text-xs text-muted-foreground">
         Resident Arcade · Built on Base
