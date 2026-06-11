@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.increment_xp(uuid, integer) FROM authenticated, anon, PUBLIC;
