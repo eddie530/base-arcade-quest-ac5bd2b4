@@ -14,7 +14,29 @@ import { WalletButton } from "@/components/arcade/WalletButton";
 import { toast } from "sonner";
 import { Flame, Gift, Sparkles, Trophy, CircleDot, Gamepad2, Copy, Check, Pencil } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/app/")({ component: Dashboard });
+export const Route = createFileRoute("/_authenticated/app/")({
+  head: () => ({
+    meta: [
+      { title: "Your Arcade Dashboard — Resident Arcade" },
+      {
+        name: "description",
+        content:
+          "Your Resident Arcade dashboard: track XP, daily streaks, badges, leaderboard rank, and your referral link.",
+      },
+      { property: "og:title", content: "Your Arcade Dashboard — Resident Arcade" },
+      {
+        property: "og:description",
+        content:
+          "Claim daily XP, spin the wheel, flip coins, and climb the Base-native arcade leaderboard.",
+      },
+      { property: "og:url", content: "https://base-arcade-quest.lovable.app/app" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/app" },
+    ],
+  }),
+  component: Dashboard,
+});
 
 function Dashboard() {
   const qc = useQueryClient();
@@ -91,6 +113,7 @@ function Dashboard() {
 
   return (
     <div className="space-y-5">
+      <h1 className="sr-only">Your Arcade Dashboard</h1>
       {/* Profile card */}
       <section className="glass-strong rounded-3xl p-5 sm:p-6 overflow-hidden relative">
         <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-[var(--gradient-neon)] opacity-20 blur-3xl pointer-events-none" />
@@ -111,7 +134,7 @@ function Dashboard() {
               ) : (
                 <>
                   <h2 className="truncate text-2xl font-black">{profile?.username ?? "—"}</h2>
-                  <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground">
+                  <button onClick={() => setEditing(true)} aria-label="Edit username" className="text-muted-foreground hover:text-foreground">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                 </>
