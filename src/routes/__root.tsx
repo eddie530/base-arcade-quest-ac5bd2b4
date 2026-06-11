@@ -80,6 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "google-site-verification", content: "ePMOn5ufdsOpN02avFjTPi96Goekq2d7A0pf5bweLIU" },
       { title: "Resident Arcade — Play. Earn. Flex." },
       { name: "description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
       { property: "og:title", content: "Resident Arcade — Play. Earn. Flex." },
