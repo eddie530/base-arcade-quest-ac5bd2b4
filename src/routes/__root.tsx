@@ -94,6 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       }),
       { name: "twitter:title", content: "Resident Arcade — Play. Earn. Flex." },
       { name: "twitter:description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png" },
     ],
     links: [
       {
