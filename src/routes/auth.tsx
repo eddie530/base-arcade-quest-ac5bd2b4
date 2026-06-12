@@ -47,8 +47,11 @@ function AuthPage() {
       const state = params.get("state");
       const savedState = sessionStorage.getItem("ra_oauth_state");
       if (state && savedState && state !== savedState) {
-        toast.error("Invalid OAuth state. Please try again.");
         sessionStorage.removeItem("ra_oauth_state");
+        supabase.auth.signOut().then(() => {
+          toast.error("Invalid OAuth state. Please try again.");
+          router.navigate({ to: "/auth" });
+        });
         return;
       }
       if (state && savedState) {
