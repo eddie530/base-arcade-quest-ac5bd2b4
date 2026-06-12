@@ -48,11 +48,8 @@ function AuthPage() {
 
   const google = async () => {
     setLoading(true);
-    const state = crypto.randomUUID();
-    sessionStorage.setItem("ra_oauth_state", state);
     const r = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + "/app",
-      extraParams: { state },
     });
     if (r.error) toast.error(r.error.message);
     if (!r.redirected && !r.error) router.navigate({ to: "/app" });
