@@ -82,9 +82,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "google-site-verification", content: "ePMOn5ufdsOpN02avFjTPi96Goekq2d7A0pf5bweLIU" },
       { title: "Resident Arcade — Play. Earn. Flex." },
-      { name: "description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
+      {
+        name: "description",
+        content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks.",
+      },
       { property: "og:title", content: "Resident Arcade — Play. Earn. Flex." },
-      { property: "og:description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
+      {
+        property: "og:description",
+        content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:image", content: shareImageUrl("score") },
       { name: "twitter:card", content: "summary_large_image" },
@@ -94,9 +100,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         buttonTitle: "🎮 Launch Arcade",
       }),
       { name: "twitter:title", content: "Resident Arcade — Play. Earn. Flex." },
-      { name: "twitter:description", content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png" },
+      {
+        name: "twitter:description",
+        content: "A Base-native arcade for the Farcaster era. Spin, flip, climb the ranks.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/db428eeb-c8b2-46ff-a3b5-0c389de7331a/id-preview-7dac5189--b743b1c7-b8b6-403c-9759-7cce6495b5fc.lovable.app-1781209014508.png",
+      },
     ],
     links: [
       {

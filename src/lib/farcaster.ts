@@ -6,11 +6,7 @@ export function shareImageUrl(kind: ShareKind) {
   return `${APP_URL}/frames/${kind}.png`;
 }
 
-export function miniAppEmbed(opts: {
-  imageUrl: string;
-  buttonTitle?: string;
-  launchUrl?: string;
-}) {
+export function miniAppEmbed(opts: { imageUrl: string; buttonTitle?: string; launchUrl?: string }) {
   return {
     version: "1",
     imageUrl: opts.imageUrl,
@@ -28,11 +24,7 @@ export function miniAppEmbed(opts: {
 }
 
 /** Build the fc:miniapp + legacy fc:frame meta entries for a route head(). */
-export function miniAppMeta(opts: {
-  imageUrl: string;
-  buttonTitle?: string;
-  launchUrl?: string;
-}) {
+export function miniAppMeta(opts: { imageUrl: string; buttonTitle?: string; launchUrl?: string }) {
   const json = JSON.stringify(miniAppEmbed(opts));
   return [
     { name: "fc:miniapp", content: json },

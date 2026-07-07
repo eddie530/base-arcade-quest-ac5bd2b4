@@ -23,9 +23,7 @@ export const Route = createFileRoute("/_authenticated/app/spinbase")({
       },
       { property: "og:url", content: "https://base-arcade-quest.lovable.app/app/spinbase" },
     ],
-    links: [
-      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/app/spinbase" },
-    ],
+    links: [{ rel: "canonical", href: "https://base-arcade-quest.lovable.app/app/spinbase" }],
   }),
   component: SpinBase,
 });
@@ -70,14 +68,25 @@ function SpinBase() {
 
       {/* Games */}
       <section className="grid grid-cols-2 gap-3">
-        <GameTile to="/app/spin" Icon={CircleDot} title="Lucky Spin" sub="Win up to 1,000 XP" gradient />
+        <GameTile
+          to="/app/spin"
+          Icon={CircleDot}
+          title="Lucky Spin"
+          sub="Win up to 1,000 XP"
+          gradient
+        />
         <GameTile to="/app/flip" Icon={Gamepad2} title="Coin Flip" sub="Heads or tails" />
       </section>
 
       {/* Share */}
       <section>
         <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Flex on Farcaster</h3>
-        <ShareButtons xp={xp} streak={streak} referralCode={profile?.referral_code} brand="SpinBase" />
+        <ShareButtons
+          xp={xp}
+          streak={streak}
+          referralCode={profile?.referral_code}
+          brand="SpinBase"
+        />
       </section>
 
       {/* Achievements */}

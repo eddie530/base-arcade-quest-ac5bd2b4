@@ -30,7 +30,7 @@ function FlipPage() {
       }
       // spin 6 full turns + land on result (heads = 0, tails = 180)
       const targetSide = r.result === "heads" ? 0 : 180;
-      const next = rot + 360 * 6 + (targetSide - (rot % 360) + 360) % 360;
+      const next = rot + 360 * 6 + ((targetSide - (rot % 360) + 360) % 360);
       setRot(next);
       setTimeout(() => {
         setShowing(r.result);
@@ -54,7 +54,9 @@ function FlipPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-3xl font-black tracking-tight gradient-text">Coin Flip</h1>
-        <p className="text-sm text-muted-foreground">Guess right, win 30 XP. Either way you score.</p>
+        <p className="text-sm text-muted-foreground">
+          Guess right, win 30 XP. Either way you score.
+        </p>
       </header>
 
       <div className="mx-auto aspect-square w-64 sm:w-80 perspective-[1200px] grid place-items-center">
@@ -89,7 +91,15 @@ function FlipPage() {
   );
 }
 
-function CoinFace({ label, flipped, hidden }: { label: string; flipped?: boolean; hidden?: boolean }) {
+function CoinFace({
+  label,
+  flipped,
+  hidden,
+}: {
+  label: string;
+  flipped?: boolean;
+  hidden?: boolean;
+}) {
   return (
     <div
       className="absolute inset-0 rounded-full grid place-items-center text-3xl font-black"

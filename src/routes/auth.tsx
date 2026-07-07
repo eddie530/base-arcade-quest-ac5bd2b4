@@ -22,9 +22,7 @@ export const Route = createFileRoute("/auth")({
       },
       { property: "og:url", content: "https://base-arcade-quest.lovable.app/auth" },
     ],
-    links: [
-      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/auth" },
-    ],
+    links: [{ rel: "canonical", href: "https://base-arcade-quest.lovable.app/auth" }],
   }),
   component: AuthPage,
 });
@@ -59,9 +57,17 @@ function AuthPage() {
   const emailAuth = async (mode: "signin" | "signup") => {
     setLoading(true);
     const fn = mode === "signin" ? supabase.auth.signInWithPassword : supabase.auth.signUp;
-    const opts: any = mode === "signup"
-      ? { email, password, options: { emailRedirectTo: window.location.origin + "/app", data: { name: email.split("@")[0] } } }
-      : { email, password };
+    const opts: any =
+      mode === "signup"
+        ? {
+            email,
+            password,
+            options: {
+              emailRedirectTo: window.location.origin + "/app",
+              data: { name: email.split("@")[0] },
+            },
+          }
+        : { email, password };
     const { error } = await fn(opts);
     if (error) toast.error(error.message);
     else router.navigate({ to: "/app" });
@@ -71,7 +77,11 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/" aria-label="Resident Arcade home" className="flex items-center justify-center gap-2 mb-8">
+        <Link
+          to="/"
+          aria-label="Resident Arcade home"
+          className="flex items-center justify-center gap-2 mb-8"
+        >
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--gradient-neon)] shadow-[var(--shadow-glow)] animate-float">
             <Gamepad2 className="h-6 w-6 text-background" />
           </span>

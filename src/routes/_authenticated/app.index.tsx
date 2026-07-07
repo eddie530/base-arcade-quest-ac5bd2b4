@@ -2,17 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import {
-  getMyProfile,
-  claimDaily,
-  applyReferral,
-  updateProfile,
-} from "@/lib/games.functions";
+import { getMyProfile, claimDaily, applyReferral, updateProfile } from "@/lib/games.functions";
 import { ShareButtons } from "@/components/arcade/ShareButtons";
 import { BadgeGrid } from "@/components/arcade/BadgeGrid";
 import { WalletButton } from "@/components/arcade/WalletButton";
 import { toast } from "sonner";
-import { Flame, Gift, Sparkles, Trophy, CircleDot, Gamepad2, Copy, Check, Pencil } from "lucide-react";
+import {
+  Flame,
+  Gift,
+  Sparkles,
+  Trophy,
+  CircleDot,
+  Gamepad2,
+  Copy,
+  Check,
+  Pencil,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({
@@ -31,9 +36,7 @@ export const Route = createFileRoute("/_authenticated/app/")({
       },
       { property: "og:url", content: "https://base-arcade-quest.lovable.app/app" },
     ],
-    links: [
-      { rel: "canonical", href: "https://base-arcade-quest.lovable.app/app" },
-    ],
+    links: [{ rel: "canonical", href: "https://base-arcade-quest.lovable.app/app" }],
   }),
   component: Dashboard,
 });
@@ -127,14 +130,21 @@ function Dashboard() {
                     onChange={(e) => setName(e.target.value)}
                     className="glass rounded-md px-2 py-1 text-lg font-bold min-w-0"
                   />
-                  <button onClick={saveName} className="text-xs rounded-md bg-[var(--gradient-neon)] text-background px-2 py-1 font-semibold">
+                  <button
+                    onClick={saveName}
+                    className="text-xs rounded-md bg-[var(--gradient-neon)] text-background px-2 py-1 font-semibold"
+                  >
                     Save
                   </button>
                 </>
               ) : (
                 <>
                   <h2 className="truncate text-2xl font-black">{profile?.username ?? "—"}</h2>
-                  <button onClick={() => setEditing(true)} aria-label="Edit username" className="text-muted-foreground hover:text-foreground">
+                  <button
+                    onClick={() => setEditing(true)}
+                    aria-label="Edit username"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                 </>
@@ -163,9 +173,7 @@ function Dashboard() {
           <div className="font-semibold mt-0.5">
             {canClaim ? "Your daily XP is ready" : "Come back tomorrow"}
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Streak increases your reward.
-          </div>
+          <div className="text-xs text-muted-foreground mt-1">Streak increases your reward.</div>
         </div>
         <button
           disabled={!canClaim || claimMut.isPending}
@@ -179,7 +187,13 @@ function Dashboard() {
 
       {/* Games */}
       <section className="grid grid-cols-2 gap-3">
-        <GameTile to="/app/spin" Icon={CircleDot} title="Lucky Spin" sub="Win up to 1,000 XP" gradient />
+        <GameTile
+          to="/app/spin"
+          Icon={CircleDot}
+          title="Lucky Spin"
+          sub="Win up to 1,000 XP"
+          gradient
+        />
         <GameTile to="/app/flip" Icon={Gamepad2} title="Coin Flip" sub="Heads or tails" />
       </section>
 
@@ -202,7 +216,10 @@ function Dashboard() {
             <div className="text-xs text-muted-foreground">Your referral link</div>
             <div className="font-mono text-xs truncate mt-1">{refLink || "—"}</div>
           </div>
-          <button onClick={copyRef} className="shrink-0 rounded-full glass px-4 py-2 text-sm hover:bg-white/10 flex items-center gap-1.5">
+          <button
+            onClick={copyRef}
+            className="shrink-0 rounded-full glass px-4 py-2 text-sm hover:bg-white/10 flex items-center gap-1.5"
+          >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? "Copied" : "Copy"}
           </button>
