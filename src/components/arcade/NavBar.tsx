@@ -1,16 +1,27 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Gamepad2, Trophy, CircleDot, Sparkles, Shield, LogOut, Zap } from "lucide-react";
+import {
+  Gamepad2,
+  Trophy,
+  CircleDot,
+  Sparkles,
+  Shield,
+  LogOut,
+  Zap,
+  ExternalLink,
+} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile } from "@/lib/games.functions";
 import { supabase } from "@/integrations/supabase/client";
 
+const SPINBASE_URL = "https://spinbase.dev";
+
 const NAV = [
-  { to: "/app", label: "Home", icon: Sparkles },
-  { to: "/app/spin", label: "Spin", icon: CircleDot },
-  { to: "/app/flip", label: "Flip", icon: Gamepad2 },
-  { to: "/app/spinbase", label: "SpinBase", icon: Zap },
-  { to: "/app/leaderboard", label: "Ranks", icon: Trophy },
+  { to: "/app", label: "Home", icon: Sparkles, external: false },
+  { to: "/app/spin", label: "Spin", icon: CircleDot, external: false },
+  { to: "/app/flip", label: "Flip", icon: Gamepad2, external: false },
+  { to: SPINBASE_URL, label: "SpinBase", icon: Zap, external: true },
+  { to: "/app/leaderboard", label: "Ranks", icon: Trophy, external: false },
 ] as const;
 
 export function NavBar() {
@@ -43,16 +54,29 @@ export function NavBar() {
             <span className="hidden sm:inline gradient-text">SpinBase</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
-            {NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
-                activeProps={{ className: "text-foreground bg-white/10" }}
-              >
-                {n.label}
-              </Link>
-            ))}
+            {NAV.map((n) =>
+              n.external ? (
+                <a
+                  key={n.to}
+                  href={n.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition inline-flex items-center gap-1"
+                >
+                  {n.label}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className="rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition"
+                  activeProps={{ className: "text-foreground bg-white/10" }}
+                >
+                  {n.label}
+                </Link>
+              ),
+            )}
             {data?.isAdmin && (
               <Link
                 to="/app/admin"
@@ -84,7 +108,18 @@ export function NavBar() {
         <div className="glass-strong flex items-center gap-1 rounded-full px-2 py-1.5 shadow-[var(--shadow-glow)]">
           {NAV.map((n) => {
             const Icon = n.icon;
-            return (
+            return n.external ? (
+              <a
+                key={n.to}
+                href={n.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={n.label}
+                className="grid h-10 w-12 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <Icon className="h-4.5 w-4.5" />
+              </a>
+            ) : (
               <Link
                 key={n.to}
                 to={n.to}
