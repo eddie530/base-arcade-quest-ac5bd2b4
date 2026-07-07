@@ -56,7 +56,7 @@ function AuthPage() {
 
   const emailAuth = async (mode: "signin" | "signup") => {
     setLoading(true);
-    const { error } =
+    const { data, error } =
       mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({
@@ -67,8 +67,13 @@ function AuthPage() {
               data: { name: email.split("@")[0] },
             },
           });
-    if (error) toast.error(error.message);
-    else router.navigate({ to: "/app" });
+    if (error) {
+      toast.error(error.message);
+    } else if (mode === "signup" && !data.session) {
+      toast.success("Check your inbox to confirm your email, then sign in.");
+    } else {
+      router.navigate({ to: "/app" });
+    }
     setLoading(false);
   };
 
