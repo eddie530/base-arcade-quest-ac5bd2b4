@@ -77,7 +77,7 @@ function SpinBase() {
       {/* Share */}
       <section>
         <h3 className="text-sm font-semibold mb-2 text-muted-foreground">Flex on Farcaster</h3>
-        <ShareButtons xp={xp} streak={streak} referralCode={profile?.referral_code} />
+        <ShareButtons xp={xp} streak={streak} referralCode={profile?.referral_code} brand="SpinBase" />
       </section>
 
       {/* Achievements */}

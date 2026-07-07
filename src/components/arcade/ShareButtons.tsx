@@ -6,10 +6,12 @@ export function ShareButtons({
   xp,
   streak,
   referralCode,
+  brand = "Resident Arcade",
 }: {
   xp: number;
   streak: number;
   referralCode?: string | null;
+  brand?: string;
 }) {
   const scoreEmbed = shareUrl("score", { xp, streak });
   const streakEmbed = shareUrl("streak", { streak, xp });
@@ -17,9 +19,9 @@ export function ShareButtons({
     ref: referralCode ?? undefined,
   });
 
-  const scoreText = `🎮 ${xp.toLocaleString()} XP on Resident Arcade. Play. Earn. Flex.`;
-  const streakText = `🔥 ${streak}-day streak on Resident Arcade. Can you beat me?`;
-  const challengeText = `Just hopped on Resident Arcade — join me on Base.${
+  const scoreText = `🎮 ${xp.toLocaleString()} XP on ${brand}. Play. Earn. Flex.`;
+  const streakText = `🔥 ${streak}-day streak on ${brand}. Can you beat me?`;
+  const challengeText = `Just hopped on ${brand} — join me on Base.${
     referralCode ? ` Use code ${referralCode}.` : ""
   }`;
 
