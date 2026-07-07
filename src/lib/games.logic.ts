@@ -34,15 +34,9 @@ export function computeDailyClaim(opts: {
   return { ok: true, reward, streak, xp: currentXp + reward };
 }
 
-export type CooldownCheck =
-  | { ok: true }
-  | { ok: false; remainingMs: number };
+export type CooldownCheck = { ok: true } | { ok: false; remainingMs: number };
 
-export function checkCooldown(
-  now: Date,
-  lastAt: Date | null,
-  cooldownMs: number,
-): CooldownCheck {
+export function checkCooldown(now: Date, lastAt: Date | null, cooldownMs: number): CooldownCheck {
   if (!lastAt) return { ok: true };
   const elapsed = now.getTime() - lastAt.getTime();
   if (elapsed < cooldownMs) return { ok: false, remainingMs: cooldownMs - elapsed };

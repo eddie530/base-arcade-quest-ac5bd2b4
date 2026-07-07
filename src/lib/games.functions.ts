@@ -24,7 +24,7 @@ const BADGES = {
 async function awardBadges(
   supabase: any,
   userId: string,
-  ctx: { xp: number; streak: number; firstSpin?: boolean }
+  ctx: { xp: number; streak: number; firstSpin?: boolean },
 ) {
   const earned: string[] = [];
   if (ctx.firstSpin) earned.push("first_spin");
@@ -33,9 +33,10 @@ async function awardBadges(
   if (ctx.xp >= 1000) earned.push("xp_master");
   if (ctx.xp >= 10000) earned.push("arcade_legend");
   if (earned.length === 0) return [];
-  await supabase
-    .from("user_achievements")
-    .upsert(earned.map((b) => ({ user_id: userId, badge: b })), { onConflict: "user_id,badge" });
+  await supabase.from("user_achievements").upsert(
+    earned.map((b) => ({ user_id: userId, badge: b })),
+    { onConflict: "user_id,badge" },
+  );
   return earned;
 }
 
@@ -56,8 +57,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
       .from("user_achievements")
       .select("badge, earned_at")
       .eq("user_id", userId);
-    const { data: isAdmin } = await supabase
-      .rpc("has_role", { _user_id: userId, _role: "admin" });
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
     return { profile, badges: badges ?? [], isAdmin: !!isAdmin };
   });
 
@@ -66,10 +66,15 @@ export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator((d: { username?: string; wallet_address?: string }) =>
     z
       .object({
-        username: z.string().min(2).max(24).regex(/^[a-zA-Z0-9_]+$/).optional(),
+        username: z
+          .string()
+          .min(2)
+          .max(24)
+          .regex(/^[a-zA-Z0-9_]+$/)
+          .optional(),
         wallet_address: z.string().min(10).max(64).optional(),
       })
-      .parse(d)
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const { userId } = context;
@@ -149,7 +154,9 @@ export const spin = createServerFn({ method: "POST" })
     const rewardIndex = SPIN_REWARDS.indexOf(reward);
     const newXp = (profile.xp as number) + reward.xp;
 
-    await supabaseAdmin.from("spins").insert({ user_id: userId, reward: reward.label, xp: reward.xp });
+    await supabaseAdmin
+      .from("spins")
+      .insert({ user_id: userId, reward: reward.label, xp: reward.xp });
     await supabaseAdmin
       .from("profiles")
       .update({ xp: newXp, last_spin_at: new Date().toISOString() })
@@ -169,7 +176,7 @@ export const spin = createServerFn({ method: "POST" })
 export const flip = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { guess: "heads" | "tails" }) =>
-    z.object({ guess: z.enum(["heads", "tails"]) }).parse(d)
+    z.object({ guess: z.enum(["heads", "tails"]) }).parse(d),
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
@@ -227,9 +234,7 @@ export const getLeaderboard = createServerFn({ method: "GET" })
 
 export const applyReferral = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { code: string }) =>
-    z.object({ code: z.string().min(4).max(16) }).parse(d)
-  )
+  .inputValidator((d: { code: string }) => z.object({ code: z.string().min(4).max(16) }).parse(d))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: me } = await supabase
@@ -254,7 +259,10 @@ export const applyReferral = createServerFn({ method: "POST" })
       referrer_id: referrer.user_id,
       referred_id: userId,
     });
-    await supabaseAdmin.from("profiles").update({ referred_by: referrer.user_id }).eq("user_id", userId);
+    await supabaseAdmin
+      .from("profiles")
+      .update({ referred_by: referrer.user_id })
+      .eq("user_id", userId);
     await supabaseAdmin.rpc("increment_xp", { _user_id: referrer.user_id, _delta: REWARD });
     await supabaseAdmin.rpc("increment_xp", { _user_id: userId, _delta: REWARD });
     return { ok: true, reward: REWARD };
@@ -291,7 +299,7 @@ export const adminUpdateUser = createServerFn({ method: "POST" })
         xp: z.number().int().min(0).max(10_000_000).optional(),
         streak: z.number().int().min(0).max(1000).optional(),
       })
-      .parse(d)
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -306,7 +314,7 @@ export const adminUpdateUser = createServerFn({ method: "POST" })
 export const adminGrantRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { user_id: string; role: "admin" | "user" }) =>
-    z.object({ user_id: z.string().uuid(), role: z.enum(["admin", "user"]) }).parse(d)
+    z.object({ user_id: z.string().uuid(), role: z.enum(["admin", "user"]) }).parse(d),
   )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);

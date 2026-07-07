@@ -81,7 +81,9 @@ export const Route = createFileRoute("/share/$kind")({
       <div className="space-y-3">
         <h1 className="text-2xl font-bold">Couldn't load share card</h1>
         <p className="text-sm text-muted-foreground">{error.message}</p>
-        <button onClick={() => reset()} className="underline text-[var(--neon)]">Retry</button>
+        <button onClick={() => reset()} className="underline text-[var(--neon)]">
+          Retry
+        </button>
       </div>
     </div>
   ),
@@ -89,7 +91,9 @@ export const Route = createFileRoute("/share/$kind")({
     <div className="min-h-screen grid place-items-center text-center p-6">
       <div>
         <h1 className="text-2xl font-bold">Unknown share card</h1>
-        <Link to="/" className="text-[var(--neon)] underline">Go home</Link>
+        <Link to="/" className="text-[var(--neon)] underline">
+          Go home
+        </Link>
       </div>
     </div>
   ),

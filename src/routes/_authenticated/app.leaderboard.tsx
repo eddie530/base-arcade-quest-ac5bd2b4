@@ -29,7 +29,10 @@ function Leaderboard() {
 
       <div className="glass-strong rounded-2xl overflow-hidden">
         <div className="grid grid-cols-[40px_1fr_70px_70px] gap-3 px-4 py-3 text-xs uppercase tracking-wider text-muted-foreground border-b border-white/5">
-          <div>#</div><div>Player</div><div className="text-right">XP</div><div className="text-right">Streak</div>
+          <div>#</div>
+          <div>Player</div>
+          <div className="text-right">XP</div>
+          <div className="text-right">Streak</div>
         </div>
         {isLoading && <div className="p-6 text-center text-muted-foreground text-sm">Loading…</div>}
         {data?.rows.map((row: any, i: number) => (
@@ -45,9 +48,12 @@ function Leaderboard() {
             <div className="min-w-0">
               <div className="font-semibold truncate">{row.username ?? "Player"}</div>
             </div>
-            <div className="text-right font-mono tabular-nums font-bold">{row.xp.toLocaleString()}</div>
+            <div className="text-right font-mono tabular-nums font-bold">
+              {row.xp.toLocaleString()}
+            </div>
             <div className="text-right font-mono tabular-nums text-muted-foreground flex items-center justify-end gap-1">
-              <Flame className="h-3 w-3" />{row.streak}
+              <Flame className="h-3 w-3" />
+              {row.streak}
             </div>
           </div>
         ))}

@@ -136,14 +136,25 @@ function SpinPage() {
           className="fixed inset-0 z-50 grid place-items-center bg-background/70 backdrop-blur-md p-4"
           onClick={() => setResult(null)}
         >
-          <div className="glass-strong rounded-3xl p-8 max-w-sm w-full text-center relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setResult(null)} aria-label="Close result" className="absolute top-3 right-3 text-muted-foreground hover:text-foreground">
+          <div
+            className="glass-strong rounded-3xl p-8 max-w-sm w-full text-center relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setResult(null)}
+              aria-label="Close result"
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+            >
               <X className="h-5 w-5" />
             </button>
-            <div className="text-xs uppercase tracking-widest text-muted-foreground">You landed on</div>
+            <div className="text-xs uppercase tracking-widest text-muted-foreground">
+              You landed on
+            </div>
             <div className="text-5xl font-black gradient-text mt-2">{result.reward.label}</div>
             <div className="mt-4 text-2xl font-bold">+{result.reward.xp} XP</div>
-            <div className="text-sm text-muted-foreground mt-1">Total: {result.xp.toLocaleString()} XP</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Total: {result.xp.toLocaleString()} XP
+            </div>
             <button
               onClick={() => setResult(null)}
               className="mt-6 w-full rounded-full bg-[var(--gradient-neon)] text-background font-semibold py-3"
