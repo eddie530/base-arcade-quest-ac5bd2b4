@@ -58,6 +58,8 @@ function Landing() {
             <Gamepad2 className="h-4.5 w-4.5 text-background" />
           </span>
           <span className="gradient-text text-lg tracking-tight">Resident Arcade</span>
+          <span className="text-lg tracking-tight text-muted-foreground/60">·</span>
+          <span className="gradient-text text-lg tracking-tight">SpinBase</span>
         </div>
         <Link
           to="/auth"
