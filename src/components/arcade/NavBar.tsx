@@ -1,5 +1,5 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { Gamepad2, Trophy, CircleDot, Sparkles, Shield, LogOut } from "lucide-react";
+import { Gamepad2, Trophy, CircleDot, Sparkles, Shield, LogOut, Zap } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile } from "@/lib/games.functions";
@@ -9,6 +9,7 @@ const NAV = [
   { to: "/app", label: "Home", icon: Sparkles },
   { to: "/app/spin", label: "Spin", icon: CircleDot },
   { to: "/app/flip", label: "Flip", icon: Gamepad2 },
+  { to: "/app/spinbase", label: "SpinBase", icon: Zap },
   { to: "/app/leaderboard", label: "Ranks", icon: Trophy },
 ] as const;
 
