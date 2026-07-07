@@ -56,19 +56,17 @@ function AuthPage() {
 
   const emailAuth = async (mode: "signin" | "signup") => {
     setLoading(true);
-    const fn = mode === "signin" ? supabase.auth.signInWithPassword : supabase.auth.signUp;
-    const opts: any =
-      mode === "signup"
-        ? {
+    const { error } =
+      mode === "signin"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({
             email,
             password,
             options: {
               emailRedirectTo: window.location.origin + "/app",
               data: { name: email.split("@")[0] },
             },
-          }
-        : { email, password };
-    const { error } = await fn(opts);
+          });
     if (error) toast.error(error.message);
     else router.navigate({ to: "/app" });
     setLoading(false);
