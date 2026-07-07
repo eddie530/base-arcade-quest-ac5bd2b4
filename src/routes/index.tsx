@@ -6,6 +6,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Resident Arcade — Play. Earn. Flex." },
+      { name: "talentapp:project_verification", content: "9648cd617829f85351fe4b70e9ebaa60df63760f4192bec304504d836c6d400a2e2af240521b3fffedc502497dee277d89536b67e53301d91c323f9033f9206a" },
       {
         name: "description",
         content:
