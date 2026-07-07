@@ -15,7 +15,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareKindRouteImport } from './routes/share.$kind'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
-import { Route as AuthenticatedAppSpinbaseRouteImport } from './routes/_authenticated/app.spinbase'
 import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
 import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
 import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
@@ -50,12 +49,6 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAppSpinbaseRoute =
-  AuthenticatedAppSpinbaseRouteImport.update({
-    id: '/app/spinbase',
-    path: '/app/spinbase',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAppSpinRoute = AuthenticatedAppSpinRouteImport.update({
   id: '/app/spin',
   path: '/app/spin',
@@ -87,7 +80,6 @@ export interface FileRoutesByFullPath {
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
-  '/app/spinbase': typeof AuthenticatedAppSpinbaseRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -99,7 +91,6 @@ export interface FileRoutesByTo {
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
-  '/app/spinbase': typeof AuthenticatedAppSpinbaseRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -113,7 +104,6 @@ export interface FileRoutesById {
   '/_authenticated/app/flip': typeof AuthenticatedAppFlipRoute
   '/_authenticated/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
   '/_authenticated/app/spin': typeof AuthenticatedAppSpinRoute
-  '/_authenticated/app/spinbase': typeof AuthenticatedAppSpinbaseRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -127,7 +117,6 @@ export interface FileRouteTypes {
     | '/app/flip'
     | '/app/leaderboard'
     | '/app/spin'
-    | '/app/spinbase'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,7 +128,6 @@ export interface FileRouteTypes {
     | '/app/flip'
     | '/app/leaderboard'
     | '/app/spin'
-    | '/app/spinbase'
     | '/app'
   id:
     | '__root__'
@@ -152,7 +140,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/flip'
     | '/_authenticated/app/leaderboard'
     | '/_authenticated/app/spin'
-    | '/_authenticated/app/spinbase'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -208,13 +195,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/app/spinbase': {
-      id: '/_authenticated/app/spinbase'
-      path: '/app/spinbase'
-      fullPath: '/app/spinbase'
-      preLoaderRoute: typeof AuthenticatedAppSpinbaseRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/app/spin': {
       id: '/_authenticated/app/spin'
       path: '/app/spin'
@@ -251,7 +231,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppFlipRoute: typeof AuthenticatedAppFlipRoute
   AuthenticatedAppLeaderboardRoute: typeof AuthenticatedAppLeaderboardRoute
   AuthenticatedAppSpinRoute: typeof AuthenticatedAppSpinRoute
-  AuthenticatedAppSpinbaseRoute: typeof AuthenticatedAppSpinbaseRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -260,7 +239,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppFlipRoute: AuthenticatedAppFlipRoute,
   AuthenticatedAppLeaderboardRoute: AuthenticatedAppLeaderboardRoute,
   AuthenticatedAppSpinRoute: AuthenticatedAppSpinRoute,
-  AuthenticatedAppSpinbaseRoute: AuthenticatedAppSpinbaseRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
