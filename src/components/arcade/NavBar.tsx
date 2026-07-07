@@ -38,6 +38,8 @@ export function NavBar() {
               <Gamepad2 className="h-4 w-4 text-background" />
             </span>
             <span className="hidden sm:inline gradient-text">Resident Arcade</span>
+            <span className="hidden sm:inline text-muted-foreground/60">·</span>
+            <span className="hidden sm:inline gradient-text">SpinBase</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {NAV.map((n) => (
