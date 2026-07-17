@@ -9,3 +9,7 @@ routeTree.gen.ts
 
 e2e/test-results/
 playwright-report/
+
+# Auto-generated / vendored files — not formatted by us
+src/integrations/supabase/types.ts
+src/components/ui/
