@@ -202,7 +202,7 @@ function SlotsPage() {
         }`}
         aria-label="Slot machine, six reels by three rows"
       >
-        <div className="absolute -inset-px rounded-3xl bg-[var(--gradient-neon)] opacity-10 blur-xl pointer-events-none" />
+        <div className="absolute -inset-px rounded-3xl bg-[image:var(--gradient-neon)] opacity-10 blur-xl pointer-events-none" />
         {bonusSpins > 0 && (
           <div className="relative mb-2 text-center text-xs font-bold tracking-widest text-[var(--neon)]">
             🌀 BONUS ROUND ACTIVE · x{SLOT_BONUS_MULTIPLIER} XP
@@ -260,7 +260,7 @@ function SlotsPage() {
         <button
           onClick={() => mut.mutate()}
           disabled={spinning || mut.isPending || outOfSpins}
-          className="relative mt-3 w-full rounded-2xl bg-[var(--gradient-neon)] py-4 text-lg font-black tracking-widest text-background shadow-[var(--shadow-glow)] transition hover:opacity-90 disabled:opacity-40 disabled:shadow-none"
+          className="relative mt-3 w-full rounded-2xl bg-[image:var(--gradient-neon)] py-4 text-lg font-black tracking-widest text-background shadow-[var(--shadow-glow)] transition hover:opacity-90 disabled:opacity-40 disabled:shadow-none"
         >
           {spinning || mut.isPending
             ? "SPINNING…"
