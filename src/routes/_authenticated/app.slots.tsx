@@ -20,9 +20,10 @@ import {
   RUN_MULTIPLIER,
   SCATTER_ID,
   lineHitChance,
-  jackpotChance,
-  SLOT_JACKPOT_XP,
-  SLOT_JACKPOT_SCATTERS,
+  spinLineHitChance,
+  tierChance,
+  chanceWithin,
+  JACKPOT_TIERS,
   SLOT_JACKPOT_CAP,
   symbolChance,
   type LineWin,
@@ -86,7 +87,7 @@ function SlotsPage() {
   const { data: state } = useQuery({ queryKey: ["slots"], queryFn: () => fetchState() });
   const fetchMe = useServerFn(getMyProfile);
   const { data: me } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe() });
-  const [jackpotHit, setJackpotHit] = useState<number | null>(null);
+  const [jackpotHit, setJackpotHit] = useState<{ xp: number; name: string } | null>(null);
 
   const [grid, setGrid] = useState<SlotGrid>(() =>
     Array.from({ length: SLOT_REELS }, (_, r) => [r % 13, (r + 4) % 13, (r + 8) % 13]),
@@ -151,10 +152,15 @@ function SlotsPage() {
     const parts: string[] = [];
     if (r.xp > 0) parts.push(`+${r.xp} XP${r.isBonus ? ` (bonus x${SLOT_BONUS_MULTIPLIER})` : ""}`);
     else parts.push("No match this time");
-    if (r.jackpot) {
-      parts.unshift("🏆 RESIDENT JACKPOT");
-      setJackpotHit(r.xp);
-      if (!reduce) confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
+    if (r.tier) {
+      parts.unshift(`🏆 ${r.tier.name.toUpperCase()}`);
+      setJackpotHit({ xp: r.xp, name: r.tier.name });
+      if (!reduce)
+        confetti({
+          particleCount: r.jackpot ? 220 : 90,
+          spread: r.jackpot ? 100 : 70,
+          origin: { y: 0.5 },
+        });
       if (!muted) [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 160), i * 170));
     }
     if (r.bonusAwarded) parts.push(`Bonus round! +${r.bonusAwarded} bonus spins`);
@@ -167,7 +173,9 @@ function SlotsPage() {
   }
 
   const winCells = new Set(
-    wins.flatMap((w) => Array.from({ length: w.length }, (_, reel) => `${reel}-${w.row}`)),
+    wins.flatMap((w) =>
+      Array.from({ length: w.length }, (_, i) => `${(w.start ?? 0) + i}-${w.row}`),
+    ),
   );
   const winRows = new Set(wins.map((w) => w.row));
   const bonusSpins = state?.bonusSpins ?? 0;
@@ -206,24 +214,27 @@ function SlotsPage() {
 
       <section
         className="relative overflow-hidden rounded-2xl p-4 ring-1 ring-[var(--neon)]/50 bg-[image:var(--gradient-neon)] text-background shadow-[var(--shadow-glow)]"
-        aria-label="Resident Jackpot"
+        aria-label="Resident Jackpots"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
-              <Crown className="h-3.5 w-3.5" /> Resident Jackpot
+        <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
+          <span className="flex items-center gap-1.5">
+            <Crown className="h-3.5 w-3.5" /> Resident Jackpots
+          </span>
+          <span className="normal-case tracking-normal">XP only · no cash, tokens or prizes</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {JACKPOT_TIERS.map((t) => (
+            <div key={t.id} className="rounded-xl bg-background/15 p-2 text-center">
+              <div className="text-[10px] font-bold uppercase opacity-80">{t.name}</div>
+              <div className="font-mono text-lg font-black tabular-nums">
+                {t.xp.toLocaleString()} XP
+              </div>
+              <div className="text-[10px] opacity-80">
+                {t.id === "grand" ? `${t.scatters}+` : t.scatters} 🌀 · 1 in{" "}
+                {Math.round(1 / tierChance(t)).toLocaleString()}
+              </div>
             </div>
-            <div className="font-mono text-3xl font-black tabular-nums">
-              {SLOT_JACKPOT_XP.toLocaleString()} XP
-            </div>
-            <div className="text-xs opacity-80">
-              {SLOT_JACKPOT_SCATTERS}+ 🌀 anywhere · about 1 in{" "}
-              {Math.round(1 / jackpotChance()).toLocaleString()} spins
-            </div>
-          </div>
-          <div className="text-right text-[10px] leading-tight opacity-80 max-w-[8rem]">
-            Fixed XP award. Points only — no cash, tokens or prizes.
-          </div>
+          ))}
         </div>
       </section>
 
@@ -371,9 +382,11 @@ function SlotsPage() {
               🏆
             </div>
             <h2 id="jp-title" className="mt-2 text-2xl font-black gradient-text">
-              RESIDENT JACKPOT!
+              {jackpotHit.name.toUpperCase()}!
             </h2>
-            <p className="mt-1 font-mono text-3xl font-black">+{jackpotHit.toLocaleString()} XP</p>
+            <p className="mt-1 font-mono text-3xl font-black">
+              +{jackpotHit.xp.toLocaleString()} XP
+            </p>
             <p className="mt-2 text-xs text-muted-foreground">
               XP points have no monetary value and cannot be redeemed.
             </p>
@@ -416,6 +429,7 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", k);
   }, [onClose]);
   const hit = (lineHitChance() * 100).toFixed(2);
+  const spinHit = (spinLineHitChance() * 100).toFixed(1);
   return (
     <div
       role="dialog"
@@ -446,7 +460,8 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
             {SLOT_DAILY_SPINS} free spins per UTC day. No purchases, wagers or wallet payments.
           </li>
           <li>
-            3 paylines (top, middle, bottom). Match 3+ identical symbols starting from reel 1.
+            3 paylines (top, middle, bottom). Each line pays its best run of 3+ identical adjacent
+            symbols anywhere on the line.
           </li>
           <li>
             Run length multiplier: 3× = x{RUN_MULTIPLIER[3]}, 4× = x{RUN_MULTIPLIER[4]}, 5× = x
@@ -460,12 +475,47 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
           </li>
           <li>
             <Crown className="mr-1 inline h-3.5 w-3.5 text-[var(--neon)]" />
-            Resident Jackpot: {SLOT_JACKPOT_SCATTERS}+ 🌀 anywhere adds a fixed{" "}
-            {SLOT_JACKPOT_XP.toLocaleString()} XP (about {(jackpotChance() * 100).toFixed(4)}% per
-            spin). Jackpot spins can reach {SLOT_JACKPOT_CAP.toLocaleString()} XP on a bonus spin.
+            Jackpots (fixed XP, added on top of line wins, counted by 🌀 anywhere):
+            <ul className="mt-1 ml-5 list-disc space-y-0.5">
+              {JACKPOT_TIERS.map((t) => (
+                <li key={t.id}>
+                  {t.name}: {t.id === "grand" ? `${t.scatters}+` : `exactly ${t.scatters}`} 🌀 ={" "}
+                  {t.xp.toLocaleString()} XP · about 1 in{" "}
+                  {Math.round(1 / tierChance(t)).toLocaleString()} spins (
+                  {(tierChance(t) * 100).toFixed(3)}%)
+                </li>
+              ))}
+            </ul>
+            Jackpot spins are capped at {SLOT_JACKPOT_CAP.toLocaleString()} XP including the bonus
+            multiplier.
           </li>
-          <li>Max {SLOT_XP_CAP} XP per spin otherwise. Many spins pay nothing.</li>
+          <li>
+            Line wins are capped at {SLOT_XP_CAP} XP per spin. About {spinHit}% of spins pay line
+            XP; most spins pay nothing.
+          </li>
           <li>Chance a given payline hits 3+: about {hit}%.</li>
+          <li>
+            With {SLOT_DAILY_SPINS} spins a day, the chance of at least one Mini (or better) jackpot
+            is about{" "}
+            {(
+              chanceWithin(
+                tierChance(JACKPOT_TIERS[0]) +
+                  tierChance(JACKPOT_TIERS[1]) +
+                  tierChance(JACKPOT_TIERS[2]),
+                SLOT_DAILY_SPINS,
+              ) * 100
+            ).toFixed(0)}
+            % per day and{" "}
+            {(
+              chanceWithin(
+                tierChance(JACKPOT_TIERS[0]) +
+                  tierChance(JACKPOT_TIERS[1]) +
+                  tierChance(JACKPOT_TIERS[2]),
+                SLOT_DAILY_SPINS * 3,
+              ) * 100
+            ).toFixed(0)}
+            % over 3 days. Nothing is guaranteed.
+          </li>
           <li className="font-semibold text-foreground">
             XP are free in-app points with no monetary value and cannot be redeemed.
           </li>
