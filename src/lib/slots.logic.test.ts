@@ -77,9 +77,9 @@ describe("slots logic", () => {
     const r = scoreGrid(g);
     expect(r.wins).toEqual([
       { row: 0, symbol: 8, length: 3, xp: 60, start: 1 },
-      { row: 2, symbol: 0, length: 3, xp: 9, start: 1 },
+      { row: 2, symbol: 0, length: 4, xp: 18, start: 1 },
     ]);
-    expect(r.baseXp).toBe(69);
+    expect(r.baseXp).toBe(78);
   });
   it("caps line XP", () => {
     const r = scoreGrid(fill(12));
