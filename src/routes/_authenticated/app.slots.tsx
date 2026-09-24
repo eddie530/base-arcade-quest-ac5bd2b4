@@ -341,7 +341,8 @@ function SlotsPage() {
                   {s.bonus_awarded > 0 && <span className="ml-2">🌀 +{s.bonus_awarded}</span>}
                 </span>
                 <span className={`font-mono ${s.xp > 0 ? "text-[var(--neon)]" : ""}`}>
-                  {s.xp >= 1000 ? "🏆 " : ""}{s.xp > 0 ? `+${s.xp}` : "0"} XP
+                  {s.xp >= 1000 ? "🏆 " : ""}
+                  {s.xp > 0 ? `+${s.xp}` : "0"} XP
                 </span>
               </li>
             ))}
@@ -514,9 +515,9 @@ function PaidSpinsPlaceholder() {
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
         Not built and not available. Paid chance-based spins with valuable prizes are regulated
-        gambling in many places (New York treats online casinos, including sweepstakes-style
-        models, as unlawful). Launching requires jurisdiction-specific legal and licensing review,
-        age and location checks, provable fairness, and payment/payout infrastructure.
+        gambling in many places (New York treats online casinos, including sweepstakes-style models,
+        as unlawful). Launching requires jurisdiction-specific legal and licensing review, age and
+        location checks, provable fairness, and payment/payout infrastructure.
       </p>
       <button
         disabled

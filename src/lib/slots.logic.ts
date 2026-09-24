@@ -89,7 +89,13 @@ export function scoreGrid(grid: SlotGrid): {
     SLOT_XP_CAP,
   );
   const jackpot = scatters >= SLOT_JACKPOT_SCATTERS;
-  return { wins, baseXp: baseXp + (jackpot ? SLOT_JACKPOT_XP : 0), scatters, bonusAwarded, jackpot };
+  return {
+    wins,
+    baseXp: baseXp + (jackpot ? SLOT_JACKPOT_XP : 0),
+    scatters,
+    bonusAwarded,
+    jackpot,
+  };
 }
 
 /** Final XP after optional bonus multiplier, always capped. Mirrors the DB routine. */
@@ -131,6 +137,7 @@ export function jackpotChance(): number {
   const n = SLOT_REELS * SLOT_ROWS;
   const p = symbolChance(SCATTER_ID);
   let sum = 0;
-  for (let k = SLOT_JACKPOT_SCATTERS; k <= n; k++) sum += choose(n, k) * p ** k * (1 - p) ** (n - k);
+  for (let k = SLOT_JACKPOT_SCATTERS; k <= n; k++)
+    sum += choose(n, k) * p ** k * (1 - p) ** (n - k);
   return sum;
 }
