@@ -97,11 +97,11 @@ describe("slots logic", () => {
     expect(p).toBeLessThan(0.1);
   });
   it("jackpot: 5+ scatters add fixed XP, below 5 does not", () => {
-    const g = fill(0).map((c, i) => (i < 5 ? [SCATTER_ID, 1, 2] : [3, 4, 5]));
+    const g = fill(0).map((c, i) => (i < 5 ? [SCATTER_ID, i, i + 5] : [12, 11, 10]));
     const r = scoreGrid(g);
     expect(r.jackpot).toBe(true);
     expect(r.baseXp).toBe(SLOT_JACKPOT_XP);
-    const g4 = fill(0).map((c, i) => (i < 4 ? [SCATTER_ID, 1, 2] : [3, 4, 5]));
+    const g4 = fill(0).map((c, i) => (i < 4 ? [SCATTER_ID, i, i + 5] : [12, 11, 10]));
     expect(scoreGrid(g4).jackpot).toBe(false);
   });
   it("jackpot is capped even with bonus multiplier", () => {
