@@ -7,6 +7,7 @@ import {
   SLOT_REELS,
   SLOT_ROWS,
   SLOT_XP_CAP,
+  SLOT_JACKPOT_CAP,
   TOTAL_WEIGHT,
   buildGrid,
   scoreGrid,
@@ -58,7 +59,7 @@ export const spinSlots = createServerFn({ method: "POST" })
     const { userId } = context;
     const rolls = Array.from({ length: SLOT_REELS * SLOT_ROWS }, () => secureInt(TOTAL_WEIGHT));
     const grid = buildGrid(rolls);
-    const { wins, baseXp, bonusAwarded, scatters } = scoreGrid(grid);
+    const { wins, baseXp, bonusAwarded, scatters, jackpot } = scoreGrid(grid);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin.rpc("record_slot_spin", {
@@ -69,7 +70,7 @@ export const spinSlots = createServerFn({ method: "POST" })
       _bonus_awarded: bonusAwarded,
       _daily_limit: SLOT_DAILY_SPINS,
       _bonus_multiplier: SLOT_BONUS_MULTIPLIER,
-      _xp_cap: SLOT_XP_CAP,
+      _xp_cap: jackpot ? SLOT_JACKPOT_CAP : SLOT_XP_CAP,
       _bonus_bank_cap: SLOT_BONUS_BANK_CAP,
     });
     if (error) {
@@ -94,6 +95,7 @@ export const spinSlots = createServerFn({ method: "POST" })
       grid,
       wins: wins.map((w) => ({ ...w, xp: w.xp * mult })),
       scatters,
+      jackpot,
       xp: r.xp as number,
       isBonus: !!r.is_bonus,
       bonusAwarded,

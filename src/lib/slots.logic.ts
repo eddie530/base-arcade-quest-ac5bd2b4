@@ -11,6 +11,10 @@ export const SLOT_BONUS_MULTIPLIER = 2;
 export const SLOT_BONUS_SPINS_AWARDED = 3;
 export const SLOT_BONUS_BANK_CAP = 9;
 export const SLOT_SCATTER_TRIGGER = 3;
+// Resident Jackpot: fixed, XP-only, transparent. 5+ Neon Cores anywhere.
+export const SLOT_JACKPOT_XP = 1000;
+export const SLOT_JACKPOT_SCATTERS = 5;
+export const SLOT_JACKPOT_CAP = 2500; // absolute ceiling incl. bonus multiplier
 
 export type SlotSymbol = { id: number; name: string; glyph: string; weight: number; base: number };
 
@@ -65,6 +69,7 @@ export function scoreGrid(grid: SlotGrid): {
   baseXp: number;
   scatters: number;
   bonusAwarded: number;
+  jackpot: boolean;
 } {
   const wins: LineWin[] = [];
   for (let row = 0; row < SLOT_ROWS; row++) {
@@ -83,12 +88,16 @@ export function scoreGrid(grid: SlotGrid): {
     wins.reduce((s, w) => s + w.xp, 0),
     SLOT_XP_CAP,
   );
-  return { wins, baseXp, scatters, bonusAwarded };
+  const jackpot = scatters >= SLOT_JACKPOT_SCATTERS;
+  return { wins, baseXp: baseXp + (jackpot ? SLOT_JACKPOT_XP : 0), scatters, bonusAwarded, jackpot };
 }
 
 /** Final XP after optional bonus multiplier, always capped. Mirrors the DB routine. */
-export function finalXp(baseXp: number, isBonus: boolean): number {
-  return Math.min(Math.max(baseXp, 0) * (isBonus ? SLOT_BONUS_MULTIPLIER : 1), SLOT_XP_CAP);
+export function finalXp(baseXp: number, isBonus: boolean, jackpot = false): number {
+  return Math.min(
+    Math.max(baseXp, 0) * (isBonus ? SLOT_BONUS_MULTIPLIER : 1),
+    jackpot ? SLOT_JACKPOT_CAP : SLOT_XP_CAP,
+  );
 }
 
 export function spinsRemaining(usedToday: number): number {
@@ -109,4 +118,19 @@ export function lineHitChance(): number {
 
 export function symbolChance(id: number): number {
   return SLOT_SYMBOLS[id].weight / TOTAL_WEIGHT;
+}
+
+function choose(n: number, k: number): number {
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+  return r;
+}
+
+/** Exact chance a spin hits the jackpot (5+ scatters among 18 cells). */
+export function jackpotChance(): number {
+  const n = SLOT_REELS * SLOT_ROWS;
+  const p = symbolChance(SCATTER_ID);
+  let sum = 0;
+  for (let k = SLOT_JACKPOT_SCATTERS; k <= n; k++) sum += choose(n, k) * p ** k * (1 - p) ** (n - k);
+  return sum;
 }

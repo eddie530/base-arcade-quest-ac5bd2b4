@@ -4,7 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { toast } from "sonner";
-import { HelpCircle, Volume2, VolumeX, Share2, Sparkles, Zap, X } from "lucide-react";
+import { HelpCircle, Volume2, VolumeX, Share2, Sparkles, Zap, X, Crown, Lock } from "lucide-react";
+import confetti from "canvas-confetti";
+import { getMyProfile } from "@/lib/games.functions";
 import { getSlotsState, spinSlots } from "@/lib/slots.functions";
 import {
   SLOT_SYMBOLS,
@@ -18,6 +20,10 @@ import {
   RUN_MULTIPLIER,
   SCATTER_ID,
   lineHitChance,
+  jackpotChance,
+  SLOT_JACKPOT_XP,
+  SLOT_JACKPOT_SCATTERS,
+  SLOT_JACKPOT_CAP,
   symbolChance,
   type LineWin,
   type SlotGrid,
@@ -78,6 +84,9 @@ function SlotsPage() {
   const spin = useServerFn(spinSlots);
   const reduce = useReducedMotion();
   const { data: state } = useQuery({ queryKey: ["slots"], queryFn: () => fetchState() });
+  const fetchMe = useServerFn(getMyProfile);
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: () => fetchMe() });
+  const [jackpotHit, setJackpotHit] = useState<number | null>(null);
 
   const [grid, setGrid] = useState<SlotGrid>(() =>
     Array.from({ length: SLOT_REELS }, (_, r) => [r % 13, (r + 4) % 13, (r + 8) % 13]),
@@ -142,6 +151,12 @@ function SlotsPage() {
     const parts: string[] = [];
     if (r.xp > 0) parts.push(`+${r.xp} XP${r.isBonus ? ` (bonus x${SLOT_BONUS_MULTIPLIER})` : ""}`);
     else parts.push("No match this time");
+    if (r.jackpot) {
+      parts.unshift("🏆 RESIDENT JACKPOT");
+      setJackpotHit(r.xp);
+      if (!reduce) confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
+      if (!muted) [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 160), i * 170));
+    }
     if (r.bonusAwarded) parts.push(`Bonus round! +${r.bonusAwarded} bonus spins`);
     setResult(parts.join(" · "));
     if (!muted && r.xp > 0) beep(880, 180);
@@ -188,6 +203,29 @@ function SlotsPage() {
           </button>
         </div>
       </header>
+
+      <section
+        className="relative overflow-hidden rounded-2xl p-4 ring-1 ring-[var(--neon)]/50 bg-[image:var(--gradient-neon)] text-background shadow-[var(--shadow-glow)]"
+        aria-label="Resident Jackpot"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">
+              <Crown className="h-3.5 w-3.5" /> Resident Jackpot
+            </div>
+            <div className="font-mono text-3xl font-black tabular-nums">
+              {SLOT_JACKPOT_XP.toLocaleString()} XP
+            </div>
+            <div className="text-xs opacity-80">
+              {SLOT_JACKPOT_SCATTERS}+ 🌀 anywhere · about 1 in{" "}
+              {Math.round(1 / jackpotChance()).toLocaleString()} spins
+            </div>
+          </div>
+          <div className="text-right text-[10px] leading-tight opacity-80 max-w-[8rem]">
+            Fixed XP award. Points only — no cash, tokens or prizes.
+          </div>
+        </div>
+      </section>
 
       <section className="grid grid-cols-3 gap-2" aria-label="Slots status">
         <StatusBox label="Daily spins" value={`${remaining}/${SLOT_DAILY_SPINS}`} />
@@ -303,7 +341,7 @@ function SlotsPage() {
                   {s.bonus_awarded > 0 && <span className="ml-2">🌀 +{s.bonus_awarded}</span>}
                 </span>
                 <span className={`font-mono ${s.xp > 0 ? "text-[var(--neon)]" : ""}`}>
-                  {s.xp > 0 ? `+${s.xp}` : "0"} XP
+                  {s.xp >= 1000 ? "🏆 " : ""}{s.xp > 0 ? `+${s.xp}` : "0"} XP
                 </span>
               </li>
             ))}
@@ -312,6 +350,41 @@ function SlotsPage() {
           <p className="text-sm text-muted-foreground">No spins yet.</p>
         )}
       </section>
+
+      {me?.isAdmin && <PaidSpinsPlaceholder />}
+
+      {jackpotHit !== null && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="jp-title"
+          className="fixed inset-0 z-50 grid place-items-center bg-background/85 p-6 backdrop-blur"
+          onClick={() => setJackpotHit(null)}
+        >
+          <motion.div
+            initial={reduce ? false : { scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-strong w-full max-w-sm rounded-3xl p-6 text-center ring-2 ring-[var(--neon)] shadow-[var(--shadow-glow)]"
+          >
+            <div className="text-5xl" aria-hidden>
+              🏆
+            </div>
+            <h2 id="jp-title" className="mt-2 text-2xl font-black gradient-text">
+              RESIDENT JACKPOT!
+            </h2>
+            <p className="mt-1 font-mono text-3xl font-black">+{jackpotHit.toLocaleString()} XP</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              XP points have no monetary value and cannot be redeemed.
+            </p>
+            <button
+              onClick={() => setJackpotHit(null)}
+              className="mt-4 w-full rounded-full bg-[image:var(--gradient-neon)] py-2.5 font-bold text-background"
+            >
+              Nice!
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {help && <HowToPlay onClose={() => setHelp(false)} />}
     </div>
@@ -384,7 +457,13 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
             {SLOT_BONUS_SPINS_AWARDED} bonus spins paying x{SLOT_BONUS_MULTIPLIER}. Bonus spins
             don't use your daily allowance.
           </li>
-          <li>Max {SLOT_XP_CAP} XP per spin. Many spins pay nothing.</li>
+          <li>
+            <Crown className="mr-1 inline h-3.5 w-3.5 text-[var(--neon)]" />
+            Resident Jackpot: {SLOT_JACKPOT_SCATTERS}+ 🌀 anywhere adds a fixed{" "}
+            {SLOT_JACKPOT_XP.toLocaleString()} XP (about {(jackpotChance() * 100).toFixed(4)}% per
+            spin). Jackpot spins can reach {SLOT_JACKPOT_CAP.toLocaleString()} XP on a bonus spin.
+          </li>
+          <li>Max {SLOT_XP_CAP} XP per spin otherwise. Many spins pay nothing.</li>
           <li>Chance a given payline hits 3+: about {hit}%.</li>
           <li className="font-semibold text-foreground">
             XP are free in-app points with no monetary value and cannot be redeemed.
@@ -418,5 +497,33 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
         </p>
       </div>
     </div>
+  );
+}
+
+function PaidSpinsPlaceholder() {
+  return (
+    <section
+      className="glass rounded-2xl p-4 ring-1 ring-white/10 opacity-80"
+      aria-label="Paid spins (disabled, admin only)"
+    >
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <Lock className="h-4 w-4" /> Paid spins & redeemable prizes — DISABLED
+        <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase">
+          Admin only
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Not built and not available. Paid chance-based spins with valuable prizes are regulated
+        gambling in many places (New York treats online casinos, including sweepstakes-style
+        models, as unlawful). Launching requires jurisdiction-specific legal and licensing review,
+        age and location checks, provable fairness, and payment/payout infrastructure.
+      </p>
+      <button
+        disabled
+        className="mt-3 w-full cursor-not-allowed rounded-full glass py-2 text-sm opacity-50"
+      >
+        Buy spins (disabled)
+      </button>
+    </section>
   );
 }
