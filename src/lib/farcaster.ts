@@ -1,6 +1,6 @@
 export const APP_URL = "https://base-arcade-quest.lovable.app";
 
-type ShareKind = "score" | "streak" | "challenge";
+export type ShareKind = "score" | "streak" | "challenge" | "slots";
 
 export function shareImageUrl(kind: ShareKind) {
   return `${APP_URL}/frames/${kind}.png`;

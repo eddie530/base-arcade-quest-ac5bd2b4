@@ -17,6 +17,7 @@ import {
   Copy,
   Check,
   Pencil,
+  Dices,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/")({
@@ -187,6 +188,14 @@ function Dashboard() {
 
       {/* Games */}
       <section className="grid grid-cols-2 gap-3">
+        <Link
+          to="/app/slots"
+          className="col-span-2 relative overflow-hidden rounded-2xl p-5 bg-[var(--gradient-neon)] text-background shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
+        >
+          <Dices className="h-7 w-7 mb-3" />
+          <div className="text-lg font-black">Resident Slots</div>
+          <div className="text-xs opacity-80">6 reels · bonus rounds · 10 free spins a day</div>
+        </Link>
         <GameTile
           to="/app/spin"
           Icon={CircleDot}

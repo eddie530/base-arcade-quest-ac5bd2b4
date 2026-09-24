@@ -8,6 +8,7 @@ import {
   LogOut,
   Zap,
   ExternalLink,
+  Dices,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/app", label: "Home", icon: Sparkles, external: false },
   { to: "/app/spin", label: "Spin", icon: CircleDot, external: false },
   { to: "/app/flip", label: "Flip", icon: Gamepad2, external: false },
+  { to: "/app/slots", label: "Slots", icon: Dices, external: false },
   { to: SPINBASE_URL, label: "SpinBase", icon: Zap, external: true },
   { to: "/app/leaderboard", label: "Ranks", icon: Trophy, external: false },
 ] as const;
