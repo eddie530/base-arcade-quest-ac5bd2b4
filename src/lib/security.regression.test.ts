@@ -26,7 +26,9 @@ describe("security-definer routines", () => {
     expect(latest("get_leaderboard")).toMatch(/auth\.uid\(\) IS NOT NULL/);
   });
   it("anon cannot execute them", () => {
-    expect(all).toMatch(/REVOKE EXECUTE ON FUNCTION public\.has_role\(uuid, app_role\) FROM PUBLIC, anon/);
+    expect(all).toMatch(
+      /REVOKE EXECUTE ON FUNCTION public\.has_role\(uuid, app_role\) FROM PUBLIC, anon/,
+    );
     expect(all).toMatch(/REVOKE EXECUTE ON FUNCTION public\.get_leaderboard\(\) FROM PUBLIC, anon/);
   });
 });

@@ -13,7 +13,12 @@ export const SLOT_BONUS_BANK_CAP = 9;
 export const SLOT_SCATTER_TRIGGER = 3;
 export const SLOT_JACKPOT_CAP = 2500; // absolute per-spin ceiling on any jackpot spin
 
-export type JackpotTier = { id: "mini" | "major" | "grand"; name: string; scatters: number; xp: number };
+export type JackpotTier = {
+  id: "mini" | "major" | "grand";
+  name: string;
+  scatters: number;
+  xp: number;
+};
 // Tier is decided by the number of Neon Cores anywhere on the grid (exact count; grand = 5+).
 export const JACKPOT_TIERS: JackpotTier[] = [
   { id: "mini", name: "Mini Jackpot", scatters: 3, xp: 100 },

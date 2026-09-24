@@ -384,7 +384,9 @@ function SlotsPage() {
             <h2 id="jp-title" className="mt-2 text-2xl font-black gradient-text">
               {jackpotHit.name.toUpperCase()}!
             </h2>
-            <p className="mt-1 font-mono text-3xl font-black">+{jackpotHit.xp.toLocaleString()} XP</p>
+            <p className="mt-1 font-mono text-3xl font-black">
+              +{jackpotHit.xp.toLocaleString()} XP
+            </p>
             <p className="mt-2 text-xs text-muted-foreground">
               XP points have no monetary value and cannot be redeemed.
             </p>
@@ -494,8 +496,25 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
           <li>Chance a given payline hits 3+: about {hit}%.</li>
           <li>
             With {SLOT_DAILY_SPINS} spins a day, the chance of at least one Mini (or better) jackpot
-            is about {(chanceWithin(tierChance(JACKPOT_TIERS[0]) + tierChance(JACKPOT_TIERS[1]) + tierChance(JACKPOT_TIERS[2]), SLOT_DAILY_SPINS) * 100).toFixed(0)}% per day and{" "}
-            {(chanceWithin(tierChance(JACKPOT_TIERS[0]) + tierChance(JACKPOT_TIERS[1]) + tierChance(JACKPOT_TIERS[2]), SLOT_DAILY_SPINS * 3) * 100).toFixed(0)}% over 3 days. Nothing is guaranteed.
+            is about{" "}
+            {(
+              chanceWithin(
+                tierChance(JACKPOT_TIERS[0]) +
+                  tierChance(JACKPOT_TIERS[1]) +
+                  tierChance(JACKPOT_TIERS[2]),
+                SLOT_DAILY_SPINS,
+              ) * 100
+            ).toFixed(0)}
+            % per day and{" "}
+            {(
+              chanceWithin(
+                tierChance(JACKPOT_TIERS[0]) +
+                  tierChance(JACKPOT_TIERS[1]) +
+                  tierChance(JACKPOT_TIERS[2]),
+                SLOT_DAILY_SPINS * 3,
+              ) * 100
+            ).toFixed(0)}
+            % over 3 days. Nothing is guaranteed.
           </li>
           <li className="font-semibold text-foreground">
             XP are free in-app points with no monetary value and cannot be redeemed.
