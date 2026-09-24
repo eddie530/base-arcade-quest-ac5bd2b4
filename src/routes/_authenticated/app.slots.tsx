@@ -318,7 +318,15 @@ function SlotsPage() {
   );
 }
 
-function StatusBox({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function StatusBox({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
   return (
     <div className={`glass rounded-xl p-3 ${highlight ? "ring-1 ring-[var(--neon)]" : ""}`}>
       <div className="font-mono text-lg font-bold tabular-nums">{value}</div>
@@ -350,7 +358,11 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
           <h2 id="htp-title" className="text-xl font-black gradient-text">
             How to Play
           </h2>
-          <button onClick={onClose} aria-label="Close" className="rounded-full p-1 hover:bg-white/10">
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-full p-1 hover:bg-white/10"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -359,7 +371,9 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
             <Sparkles className="mr-1 inline h-3.5 w-3.5 text-[var(--neon)]" />
             {SLOT_DAILY_SPINS} free spins per UTC day. No purchases, wagers or wallet payments.
           </li>
-          <li>3 paylines (top, middle, bottom). Match 3+ identical symbols starting from reel 1.</li>
+          <li>
+            3 paylines (top, middle, bottom). Match 3+ identical symbols starting from reel 1.
+          </li>
           <li>
             Run length multiplier: 3× = x{RUN_MULTIPLIER[3]}, 4× = x{RUN_MULTIPLIER[4]}, 5× = x
             {RUN_MULTIPLIER[5]}, 6× = x{RUN_MULTIPLIER[6]}.
@@ -379,7 +393,10 @@ function HowToPlay({ onClose }: { onClose: () => void }) {
         <h3 className="mt-4 mb-2 text-sm font-semibold">Paytable (XP for 3 in a row)</h3>
         <div className="grid grid-cols-2 gap-1.5 text-sm">
           {SLOT_SYMBOLS.map((s) => (
-            <div key={s.id} className="glass flex items-center justify-between rounded-lg px-2 py-1.5">
+            <div
+              key={s.id}
+              className="glass flex items-center justify-between rounded-lg px-2 py-1.5"
+            >
               <span>
                 <span aria-hidden className="mr-1.5">
                   {s.glyph}
