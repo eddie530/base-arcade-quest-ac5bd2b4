@@ -135,6 +135,7 @@ export type Database = {
           grid: Json
           id: string
           is_bonus: boolean
+          jackpot: boolean
           spin_day: string
           user_id: string
           wins: Json
@@ -146,6 +147,7 @@ export type Database = {
           grid: Json
           id?: string
           is_bonus?: boolean
+          jackpot?: boolean
           spin_day?: string
           user_id: string
           wins?: Json
@@ -157,6 +159,7 @@ export type Database = {
           grid?: Json
           id?: string
           is_bonus?: boolean
+          jackpot?: boolean
           spin_day?: string
           user_id?: string
           wins?: Json

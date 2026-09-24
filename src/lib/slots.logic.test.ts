@@ -11,6 +11,9 @@ import {
   finalXp,
   spinsRemaining,
   lineHitChance,
+  jackpotChance,
+  SLOT_JACKPOT_XP,
+  SLOT_JACKPOT_CAP,
 } from "./slots.logic";
 
 const fill = (id: number) => Array.from({ length: 6 }, () => [id, id, id]);
@@ -92,5 +95,22 @@ describe("slots logic", () => {
     const p = lineHitChance();
     expect(p).toBeGreaterThan(0);
     expect(p).toBeLessThan(0.1);
+  });
+  it("jackpot: 5+ scatters add fixed XP, below 5 does not", () => {
+    const g = fill(0).map((c, i) => (i < 5 ? [SCATTER_ID, i, i + 5] : [12, 11, 10]));
+    const r = scoreGrid(g);
+    expect(r.jackpot).toBe(true);
+    expect(r.baseXp).toBe(SLOT_JACKPOT_XP);
+    const g4 = fill(0).map((c, i) => (i < 4 ? [SCATTER_ID, i, i + 5] : [12, 11, 10]));
+    expect(scoreGrid(g4).jackpot).toBe(false);
+  });
+  it("jackpot is capped even with bonus multiplier", () => {
+    expect(finalXp(SLOT_JACKPOT_XP + 250, true, true)).toBe(SLOT_JACKPOT_CAP);
+    expect(finalXp(SLOT_JACKPOT_XP, true, false)).toBe(SLOT_XP_CAP);
+  });
+  it("jackpot chance is rare but non-zero", () => {
+    const p = jackpotChance();
+    expect(p).toBeGreaterThan(0);
+    expect(p).toBeLessThan(0.001);
   });
 });
