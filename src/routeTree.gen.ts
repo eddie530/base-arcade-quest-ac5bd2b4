@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ShareKindRouteImport } from './routes/share.$kind'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
+import { Route as AuthenticatedAppSlotsRouteImport } from './routes/_authenticated/app.slots'
 import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
 import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
@@ -54,6 +55,11 @@ const AuthenticatedAppSpinRoute = AuthenticatedAppSpinRouteImport.update({
   path: '/app/spin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppSlotsRoute = AuthenticatedAppSlotsRouteImport.update({
+  id: '/app/slots',
+  path: '/app/slots',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppLeaderboardRoute =
   AuthenticatedAppLeaderboardRouteImport.update({
     id: '/app/leaderboard',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/slots': typeof AuthenticatedAppSlotsRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/slots': typeof AuthenticatedAppSlotsRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/flip': typeof AuthenticatedAppFlipRoute
   '/_authenticated/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/_authenticated/app/slots': typeof AuthenticatedAppSlotsRoute
   '/_authenticated/app/spin': typeof AuthenticatedAppSpinRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
+    | '/app/slots'
     | '/app/spin'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
+    | '/app/slots'
     | '/app/spin'
     | '/app'
   id:
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin'
     | '/_authenticated/app/flip'
     | '/_authenticated/app/leaderboard'
+    | '/_authenticated/app/slots'
     | '/_authenticated/app/spin'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
@@ -202,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSpinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/slots': {
+      id: '/_authenticated/app/slots'
+      path: '/app/slots'
+      fullPath: '/app/slots'
+      preLoaderRoute: typeof AuthenticatedAppSlotsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/leaderboard': {
       id: '/_authenticated/app/leaderboard'
       path: '/app/leaderboard'
@@ -230,6 +249,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppFlipRoute: typeof AuthenticatedAppFlipRoute
   AuthenticatedAppLeaderboardRoute: typeof AuthenticatedAppLeaderboardRoute
+  AuthenticatedAppSlotsRoute: typeof AuthenticatedAppSlotsRoute
   AuthenticatedAppSpinRoute: typeof AuthenticatedAppSpinRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -238,6 +258,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppFlipRoute: AuthenticatedAppFlipRoute,
   AuthenticatedAppLeaderboardRoute: AuthenticatedAppLeaderboardRoute,
+  AuthenticatedAppSlotsRoute: AuthenticatedAppSlotsRoute,
   AuthenticatedAppSpinRoute: AuthenticatedAppSpinRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
@@ -255,3 +276,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

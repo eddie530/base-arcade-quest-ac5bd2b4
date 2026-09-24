@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { z } from "zod";
 import { APP_URL, miniAppMeta, shareImageUrl } from "@/lib/farcaster";
 
-const KIND = ["score", "streak", "challenge"] as const;
+const KIND = ["score", "streak", "challenge", "slots"] as const;
 type Kind = (typeof KIND)[number];
 
 const search = z.object({
@@ -24,6 +24,15 @@ function copy(kind: Kind, s: { xp?: number; streak?: number; ref?: string }) {
       description: `Scoring on Resident Arcade — a Base-native arcade for the Farcaster era. Think you can beat ${xp} XP?`,
       button: "🎮 Beat my score",
       launch: `${APP_URL}/app`,
+    };
+  }
+  if (kind === "slots") {
+    const xp = (s.xp ?? 0).toLocaleString();
+    return {
+      title: `🎰 ${xp} XP on Resident Slots`,
+      description: `Six reels, 14 symbols, bonus rounds. Free daily spins for XP points (no monetary value) on Resident Arcade.`,
+      button: "🎰 Play Resident Slots",
+      launch: `${APP_URL}/app/slots`,
     };
   }
   if (kind === "streak") {
