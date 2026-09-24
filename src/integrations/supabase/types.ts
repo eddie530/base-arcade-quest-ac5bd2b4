@@ -67,6 +67,7 @@ export type Database = {
           last_spin_at: string | null
           referral_code: string
           referred_by: string | null
+          slot_bonus_spins: number
           streak: number
           updated_at: string
           user_id: string
@@ -81,6 +82,7 @@ export type Database = {
           last_spin_at?: string | null
           referral_code?: string
           referred_by?: string | null
+          slot_bonus_spins?: number
           streak?: number
           updated_at?: string
           user_id: string
@@ -95,6 +97,7 @@ export type Database = {
           last_spin_at?: string | null
           referral_code?: string
           referred_by?: string | null
+          slot_bonus_spins?: number
           streak?: number
           updated_at?: string
           user_id?: string
@@ -122,6 +125,42 @@ export type Database = {
           id?: string
           referred_id?: string
           referrer_id?: string
+        }
+        Relationships: []
+      }
+      slot_spins: {
+        Row: {
+          bonus_awarded: number
+          created_at: string
+          grid: Json
+          id: string
+          is_bonus: boolean
+          spin_day: string
+          user_id: string
+          wins: Json
+          xp: number
+        }
+        Insert: {
+          bonus_awarded?: number
+          created_at?: string
+          grid: Json
+          id?: string
+          is_bonus?: boolean
+          spin_day?: string
+          user_id: string
+          wins?: Json
+          xp: number
+        }
+        Update: {
+          bonus_awarded?: number
+          created_at?: string
+          grid?: Json
+          id?: string
+          is_bonus?: boolean
+          spin_day?: string
+          user_id?: string
+          wins?: Json
+          xp?: number
         }
         Relationships: []
       }
@@ -212,6 +251,20 @@ export type Database = {
       increment_xp: {
         Args: { _delta: number; _user_id: string }
         Returns: undefined
+      }
+      record_slot_spin: {
+        Args: {
+          _base_xp: number
+          _bonus_awarded: number
+          _bonus_bank_cap: number
+          _bonus_multiplier: number
+          _daily_limit: number
+          _grid: Json
+          _user_id: string
+          _wins: Json
+          _xp_cap: number
+        }
+        Returns: Json
       }
     }
     Enums: {
