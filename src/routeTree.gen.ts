@@ -17,6 +17,7 @@ import { Route as ShareKindRouteImport } from './routes/share.$kind'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
 import { Route as AuthenticatedAppSlotsRouteImport } from './routes/_authenticated/app.slots'
+import { Route as AuthenticatedAppPredictRouteImport } from './routes/_authenticated/app.predict'
 import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
 import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
@@ -60,6 +61,11 @@ const AuthenticatedAppSlotsRoute = AuthenticatedAppSlotsRouteImport.update({
   path: '/app/slots',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppPredictRoute = AuthenticatedAppPredictRouteImport.update({
+  id: '/app/predict',
+  path: '/app/predict',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppLeaderboardRoute =
   AuthenticatedAppLeaderboardRouteImport.update({
     id: '/app/leaderboard',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/predict': typeof AuthenticatedAppPredictRoute
   '/app/slots': typeof AuthenticatedAppSlotsRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/flip': typeof AuthenticatedAppFlipRoute
   '/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/app/predict': typeof AuthenticatedAppPredictRoute
   '/app/slots': typeof AuthenticatedAppSlotsRoute
   '/app/spin': typeof AuthenticatedAppSpinRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/flip': typeof AuthenticatedAppFlipRoute
   '/_authenticated/app/leaderboard': typeof AuthenticatedAppLeaderboardRoute
+  '/_authenticated/app/predict': typeof AuthenticatedAppPredictRoute
   '/_authenticated/app/slots': typeof AuthenticatedAppSlotsRoute
   '/_authenticated/app/spin': typeof AuthenticatedAppSpinRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
+    | '/app/predict'
     | '/app/slots'
     | '/app/spin'
     | '/app/'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/flip'
     | '/app/leaderboard'
+    | '/app/predict'
     | '/app/slots'
     | '/app/spin'
     | '/app'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin'
     | '/_authenticated/app/flip'
     | '/_authenticated/app/leaderboard'
+    | '/_authenticated/app/predict'
     | '/_authenticated/app/slots'
     | '/_authenticated/app/spin'
     | '/_authenticated/app/'
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSlotsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/predict': {
+      id: '/_authenticated/app/predict'
+      path: '/app/predict'
+      fullPath: '/app/predict'
+      preLoaderRoute: typeof AuthenticatedAppPredictRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/leaderboard': {
       id: '/_authenticated/app/leaderboard'
       path: '/app/leaderboard'
@@ -249,6 +268,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppFlipRoute: typeof AuthenticatedAppFlipRoute
   AuthenticatedAppLeaderboardRoute: typeof AuthenticatedAppLeaderboardRoute
+  AuthenticatedAppPredictRoute: typeof AuthenticatedAppPredictRoute
   AuthenticatedAppSlotsRoute: typeof AuthenticatedAppSlotsRoute
   AuthenticatedAppSpinRoute: typeof AuthenticatedAppSpinRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
@@ -258,6 +278,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppFlipRoute: AuthenticatedAppFlipRoute,
   AuthenticatedAppLeaderboardRoute: AuthenticatedAppLeaderboardRoute,
+  AuthenticatedAppPredictRoute: AuthenticatedAppPredictRoute,
   AuthenticatedAppSlotsRoute: AuthenticatedAppSlotsRoute,
   AuthenticatedAppSpinRoute: AuthenticatedAppSpinRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,

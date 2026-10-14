@@ -89,7 +89,7 @@ export const Route = createFileRoute("/share/$kind")({
     <div className="min-h-screen grid place-items-center text-center p-6">
       <div className="space-y-3">
         <h1 className="text-2xl font-bold">Couldn't load share card</h1>
-        <p className="text-sm text-muted-foreground">{error.message}</p>
+        <p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : "Something went wrong"}</p>
         <button onClick={() => reset()} className="underline text-[var(--neon)]">
           Retry
         </button>
