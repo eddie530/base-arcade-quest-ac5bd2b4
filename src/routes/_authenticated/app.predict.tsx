@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Share2, Target } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
+import { Flame, Lock, Share2, Target } from "lucide-react";
 import { toast } from "sonner";
+import { createMarket, getPredictState, placePick, resolveMarket } from "@/lib/predict.functions";
+import { isMarketOpen, predictXp } from "@/lib/predict.logic";
 
 export const Route = createFileRoute("/_authenticated/app/predict")({
   head: () => ({
@@ -9,10 +13,10 @@ export const Route = createFileRoute("/_authenticated/app/predict")({
       { title: "PredictX — Resident Arcade" },
       {
         name: "description",
-        content: "Free-to-play prediction game. Call crypto, onchain and social outcomes for fun.",
+        content: "Free-to-play prediction game. Call daily and weekly outcomes and earn XP for correct picks.",
       },
       { property: "og:title", content: "PredictX — Resident Arcade" },
-      { property: "og:description", content: "Call the outcome. Accuracy is the flex." },
+      { property: "og:description", content: "Call the outcome. Earn XP. Build your streak." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -20,61 +24,61 @@ export const Route = createFileRoute("/_authenticated/app/predict")({
   component: PredictPage,
 });
 
-type Side = "yes" | "no";
-type Pick = { side: Side; confidence: number };
-
-const MARKETS = [
-  { id: "eth-5k", q: "Will ETH close above $5,000 this week?", cat: "Crypto" },
-  { id: "base-tvl", q: "Will Base TVL hit a new all-time high this month?", cat: "Onchain" },
-  { id: "btc-dom", q: "Will BTC dominance rise above 60% by Friday?", cat: "Crypto" },
-  { id: "fc-users", q: "Will Farcaster daily casts exceed 1M this week?", cat: "Social" },
-  { id: "gas-low", q: "Will Base gas stay under 0.01 gwei all weekend?", cat: "Onchain" },
-  { id: "meme-flip", q: "Will a new memecoin flip a top-20 token this month?", cat: "Social" },
-];
-
-const KEY = "predictx:v1";
+function timeLeft(iso: string) {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return "Closed";
+  const h = Math.floor(ms / 3600000);
+  return h >= 24 ? `${Math.floor(h / 24)}d ${h % 24}h left` : `${h}h ${Math.floor((ms % 3600000) / 60000)}m left`;
+}
 
 function PredictPage() {
-  const [picks, setPicks] = useState<Record<string, Pick>>({});
-  const [res, setRes] = useState<Record<string, Side>>({});
-  const [tab, setTab] = useState<"markets" | "stats">("markets");
+  const qc = useQueryClient();
+  const fetchState = useServerFn(getPredictState);
+  const pickFn = useServerFn(placePick);
+  const resolveFn = useServerFn(resolveMarket);
+  const createFn = useServerFn(createMarket);
+  const { data, isLoading } = useQuery({ queryKey: ["predict"], queryFn: () => fetchState() });
+  const [tab, setTab] = useState<"open" | "resolved">("open");
 
-  useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) || "{}");
-      setPicks(s.picks ?? {});
-      setRes(s.res ?? {});
-    } catch {
-      /* ignore */
-    }
-  }, []);
-  useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify({ picks, res }));
-  }, [picks, res]);
-
-  const stats = useMemo(() => {
-    let correct = 0;
-    let total = 0;
-    for (const [id, p] of Object.entries(picks)) {
-      if (res[id]) {
-        total++;
-        if (res[id] === p.side) correct++;
-      }
-    }
-    return { correct, total, count: Object.keys(picks).length, acc: total ? (correct / total) * 100 : 0 };
-  }, [picks, res]);
-
-  const pick = (id: string, side: Side) => {
-    if (res[id]) return;
-    setPicks((p) => ({ ...p, [id]: { side, confidence: p[id]?.confidence ?? 50 } }));
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["predict"] });
+    qc.invalidateQueries({ queryKey: ["me"] });
   };
 
-  const share = (id: string) => {
-    const m = MARKETS.find((x) => x.id === id)!;
-    const p = picks[id];
-    const text = `I called ${p ? p.side.toUpperCase() : "?"} on "${m.q}" in PredictX on Resident Arcade 🎯`;
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent("https://base-arcade-quest.lovable.app/")}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+  const pick = useMutation({
+    mutationFn: (v: { marketId: string; side: "yes" | "no" }) => pickFn({ data: v }),
+    onSuccess: (r) => {
+      if (!r.ok) toast.error(r.reason === "closed" ? "This question is closed." : "Couldn't save pick.");
+      else toast.success("Pick locked in");
+      refresh();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const resolve = useMutation({
+    mutationFn: (v: { marketId: string; outcome: "yes" | "no" }) => resolveFn({ data: v }),
+    onSuccess: (r) => {
+      if (r.ok) toast.success(`Resolved · ${r.picks} picks scored`);
+      else toast.error("Already resolved");
+      refresh();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const picks = new Map((data?.picks ?? []).map((p) => [p.market_id, p]));
+  const markets = (data?.markets ?? []).filter((m) =>
+    tab === "open" ? !m.resolution : !!m.resolution,
+  );
+  const p = data?.profile;
+  const streak = p?.predict_streak ?? 0;
+  const acc = p?.predict_resolved ? Math.round(((p.predict_correct ?? 0) / p.predict_resolved) * 100) : null;
+
+  const share = (q: string, side?: string) => {
+    const text = `I called ${side ? side.toUpperCase() : "it"} on "${q}" in PredictX 🎯 ${streak}-call streak on Resident Arcade`;
+    window.open(
+      `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent("https://base-arcade-quest.lovable.app/share/score")}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   };
 
   return (
@@ -85,25 +89,35 @@ function PredictPage() {
           <h1 className="text-3xl font-black gradient-text">PredictX</h1>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Social prediction game · free to play · no money, no wagers
+          Call daily & weekly outcomes. Correct calls earn free XP (points with no monetary value).
         </p>
       </header>
 
-      <div className="mb-4 grid grid-cols-3 gap-2">
+      <div className="mb-4 grid grid-cols-4 gap-2">
         {[
-          { k: "Calls", v: stats.count },
-          { k: "Resolved", v: stats.total },
-          { k: "Accuracy", v: stats.total ? `${stats.acc.toFixed(0)}%` : "—" },
+          { k: "XP", v: p?.xp ?? 0 },
+          { k: "Streak", v: streak },
+          { k: "Correct", v: p?.predict_correct ?? 0 },
+          { k: "Accuracy", v: acc === null ? "—" : `${acc}%` },
         ].map((s) => (
           <div key={s.k} className="glass rounded-xl p-3 text-center">
-            <div className="text-xl font-black gradient-text">{s.v}</div>
-            <div className="text-xs text-muted-foreground">{s.k}</div>
+            <div className="text-lg font-black gradient-text">{s.v}</div>
+            <div className="text-[11px] text-muted-foreground">{s.k}</div>
           </div>
         ))}
       </div>
 
+      <div className="mb-4 glass rounded-xl p-3 text-xs text-muted-foreground flex items-start gap-2">
+        <Flame className="h-4 w-4 shrink-0 text-[var(--neon)]" />
+        <span>
+          Correct call = 50 XP + 10 XP per streak step (max 100 XP). A wrong call resets your streak.
+          Next correct call pays <b className="text-foreground">{predictXp(true, streak)} XP</b>. Badges at 5 and
+          25 correct, and a 5-call streak.
+        </span>
+      </div>
+
       <div className="mb-4 flex gap-2">
-        {(["markets", "stats"] as const).map((t) => (
+        {(["open", "resolved"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -111,97 +125,145 @@ function PredictPage() {
               tab === t ? "bg-white/10 text-foreground" : "text-muted-foreground hover:bg-white/5"
             }`}
           >
-            {t === "stats" ? "My record" : "Markets"}
+            {t}
           </button>
         ))}
       </div>
 
-      {tab === "markets" ? (
-        <div className="space-y-3">
-          {MARKETS.map((m) => {
-            const p = picks[m.id];
-            const r = res[m.id];
-            return (
-              <div key={m.id} className="glass rounded-2xl p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-[var(--neon)]">{m.cat}</span>
-                    <h2 className="mt-1 font-semibold">{m.q}</h2>
-                  </div>
-                  <button
-                    onClick={() => share(m.id)}
-                    aria-label="Share to Farcaster"
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full glass hover:bg-white/10"
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </button>
+      {isLoading && <p className="text-sm text-muted-foreground">Loading questions…</p>}
+      <div className="space-y-3">
+        {markets.map((m) => {
+          const mine = picks.get(m.id);
+          const open = isMarketOpen(m);
+          return (
+            <div key={m.id} className="glass rounded-2xl p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-[var(--neon)]">
+                    {m.category} · {m.cadence} · {m.resolution ? "Resolved" : timeLeft(m.closes_at)}
+                  </span>
+                  <h2 className="mt-1 font-semibold">{m.question}</h2>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {(["yes", "no"] as const).map((s) => (
+                <button
+                  onClick={() => share(m.question, mine?.side)}
+                  aria-label="Share to Farcaster"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full glass hover:bg-white/10"
+                >
+                  <Share2 className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(["yes", "no"] as const).map((s) => (
+                  <button
+                    key={s}
+                    disabled={!open || pick.isPending}
+                    onClick={() => pick.mutate({ marketId: m.id, side: s })}
+                    className={`rounded-xl py-2 font-bold uppercase transition disabled:opacity-60 ${
+                      mine?.side === s
+                        ? "bg-[var(--gradient-neon)] text-background shadow-[var(--shadow-glow)]"
+                        : "glass hover:bg-white/10"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {m.resolution && (
+                <p className="mt-2 text-sm">
+                  Answer: <b className="uppercase">{m.resolution}</b> —{" "}
+                  {mine ? (mine.correct ? `✅ +${mine.xp} XP` : "❌ Missed") : "no call"}
+                </p>
+              )}
+              {data?.isAdmin && !m.resolution && (
+                <div className="mt-3 flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">Admin: resolve as</span>
+                  {(["yes", "no"] as const).map((o) => (
                     <button
-                      key={s}
-                      disabled={!!r}
-                      onClick={() => pick(m.id, s)}
-                      className={`rounded-xl py-2 font-bold uppercase transition disabled:opacity-60 ${
-                        p?.side === s
-                          ? "bg-[var(--gradient-neon)] text-background shadow-[var(--shadow-glow)]"
-                          : "glass hover:bg-white/10"
-                      }`}
+                      key={o}
+                      disabled={resolve.isPending}
+                      onClick={() => {
+                        if (confirm(`Resolve "${m.question}" as ${o.toUpperCase()}? This awards XP and can't be undone.`))
+                          resolve.mutate({ marketId: m.id, outcome: o });
+                      }}
+                      className="rounded border border-white/15 px-2 py-0.5 uppercase hover:bg-white/10"
                     >
-                      {s}
+                      {o}
                     </button>
                   ))}
                 </div>
-                {r && (
-                  <p className="mt-2 text-sm">
-                    Resolved <b className="uppercase">{r}</b> —{" "}
-                    {p ? (p.side === r ? "✅ You called it" : "❌ Missed") : "no call"}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="glass rounded-2xl p-5 text-sm">
-          <p>
-            {stats.correct} correct of {stats.total} resolved calls.
-          </p>
-          <button
-            onClick={() => {
-              setPicks({});
-              setRes({});
-              toast.success("Record cleared");
-            }}
-            className="mt-3 rounded-lg glass px-3 py-1.5 hover:bg-white/10"
-          >
-            Reset record
-          </button>
-        </div>
-      )}
-
-      <div className="mt-8 rounded-xl border border-dashed border-white/10 p-3">
-        <p className="mb-2 text-xs text-muted-foreground">Demo resolution (simulates an oracle)</p>
-        <div className="flex flex-wrap gap-2">
-          {MARKETS.map((m) => (
-            <div key={m.id} className="flex items-center gap-1 text-xs">
-              <span className="max-w-[80px] truncate text-muted-foreground">{m.id}</span>
-              {(["yes", "no"] as const).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setRes((x) => ({ ...x, [m.id]: s }))}
-                  className="rounded border border-white/15 px-2 py-0.5 uppercase hover:bg-white/10"
-                >
-                  {s}
-                </button>
-              ))}
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })}
+        {!isLoading && markets.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nothing here yet.</p>
+        )}
       </div>
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        For fun only. No USDC, deposits, wagers or prizes. Calls are saved on this device.
-      </p>
+
+      {data?.isAdmin && <NewMarket onCreate={(v) => createFn({ data: v }).then(refresh)} />}
+
+      <div className="mt-8 glass rounded-2xl p-4 opacity-80">
+        <div className="flex items-center gap-2 font-semibold">
+          <Lock className="h-4 w-4" /> Real-money predictions — DISABLED
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Questions and scoring are ready, but USDC stakes and payouts are switched off. They require
+          legal sign-off, a license, age/location checks and identity verification first. No deposits,
+          wagers or prizes are possible today.
+        </p>
+      </div>
     </div>
+  );
+}
+
+function NewMarket({
+  onCreate,
+}: {
+  onCreate: (v: { question: string; category: "Crypto" | "Onchain" | "Social"; cadence: "daily" | "weekly" }) => Promise<unknown>;
+}) {
+  const [question, setQuestion] = useState("");
+  const [category, setCategory] = useState<"Crypto" | "Onchain" | "Social">("Crypto");
+  const [cadence, setCadence] = useState<"daily" | "weekly">("daily");
+  const [busy, setBusy] = useState(false);
+  return (
+    <form
+      className="mt-6 glass rounded-2xl p-4 space-y-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+          await onCreate({ question, category, cadence });
+          setQuestion("");
+          toast.success("Question published");
+        } catch (err) {
+          toast.error((err as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <h2 className="font-semibold text-sm">Admin · New question</h2>
+      <input
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Will … ?"
+        aria-label="Question"
+        className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm"
+      />
+      <div className="flex gap-2">
+        <select aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value as never)} className="rounded-lg bg-white/5 px-2 py-1.5 text-sm">
+          <option>Crypto</option>
+          <option>Onchain</option>
+          <option>Social</option>
+        </select>
+        <select aria-label="Cadence" value={cadence} onChange={(e) => setCadence(e.target.value as never)} className="rounded-lg bg-white/5 px-2 py-1.5 text-sm">
+          <option value="daily">Daily (closes in 24h)</option>
+          <option value="weekly">Weekly (closes in 7d)</option>
+        </select>
+        <button disabled={busy || question.trim().length < 8} className="ml-auto rounded-lg bg-[var(--gradient-neon)] px-3 py-1.5 text-sm font-semibold text-background disabled:opacity-50">
+          Publish
+        </button>
+      </div>
+    </form>
   );
 }
