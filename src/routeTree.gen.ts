@@ -9,22 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShareKindRouteImport } from './routes/share.$kind'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
-import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
-import { Route as AuthenticatedAppSlotsRouteImport } from './routes/_authenticated/app.slots'
-import { Route as AuthenticatedAppPredictRouteImport } from './routes/_authenticated/app.predict'
-import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
-import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
+import { Route as AuthenticatedAppFlipRouteImport } from './routes/_authenticated/app.flip'
+import { Route as AuthenticatedAppLeaderboardRouteImport } from './routes/_authenticated/app.leaderboard'
+import { Route as AuthenticatedAppPredictRouteImport } from './routes/_authenticated/app.predict'
+import { Route as AuthenticatedAppSlotsRouteImport } from './routes/_authenticated/app.slots'
+import { Route as AuthenticatedAppSpinRouteImport } from './routes/_authenticated/app.spin'
 
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -32,13 +36,9 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShareKindRoute = ShareKindRouteImport.update({
@@ -51,19 +51,14 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAppSpinRoute = AuthenticatedAppSpinRouteImport.update({
-  id: '/app/spin',
-  path: '/app/spin',
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/app/admin',
+  path: '/app/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAppSlotsRoute = AuthenticatedAppSlotsRouteImport.update({
-  id: '/app/slots',
-  path: '/app/slots',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAppPredictRoute = AuthenticatedAppPredictRouteImport.update({
-  id: '/app/predict',
-  path: '/app/predict',
+const AuthenticatedAppFlipRoute = AuthenticatedAppFlipRouteImport.update({
+  id: '/app/flip',
+  path: '/app/flip',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppLeaderboardRoute =
@@ -72,14 +67,19 @@ const AuthenticatedAppLeaderboardRoute =
     path: '/app/leaderboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAppFlipRoute = AuthenticatedAppFlipRouteImport.update({
-  id: '/app/flip',
-  path: '/app/flip',
+const AuthenticatedAppPredictRoute = AuthenticatedAppPredictRouteImport.update({
+  id: '/app/predict',
+  path: '/app/predict',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
-  id: '/app/admin',
-  path: '/app/admin',
+const AuthenticatedAppSlotsRoute = AuthenticatedAppSlotsRouteImport.update({
+  id: '/app/slots',
+  path: '/app/slots',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppSpinRoute = AuthenticatedAppSpinRouteImport.update({
+  id: '/app/spin',
+  path: '/app/spin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
@@ -177,18 +177,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -198,11 +191,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/share/$kind': {
@@ -219,32 +219,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/app/spin': {
-      id: '/_authenticated/app/spin'
-      path: '/app/spin'
-      fullPath: '/app/spin'
-      preLoaderRoute: typeof AuthenticatedAppSpinRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/app/slots': {
-      id: '/_authenticated/app/slots'
-      path: '/app/slots'
-      fullPath: '/app/slots'
-      preLoaderRoute: typeof AuthenticatedAppSlotsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/app/predict': {
-      id: '/_authenticated/app/predict'
-      path: '/app/predict'
-      fullPath: '/app/predict'
-      preLoaderRoute: typeof AuthenticatedAppPredictRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/app/leaderboard': {
-      id: '/_authenticated/app/leaderboard'
-      path: '/app/leaderboard'
-      fullPath: '/app/leaderboard'
-      preLoaderRoute: typeof AuthenticatedAppLeaderboardRouteImport
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/app/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/flip': {
@@ -254,11 +233,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFlipRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/app/admin': {
-      id: '/_authenticated/app/admin'
-      path: '/app/admin'
-      fullPath: '/app/admin'
-      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+    '/_authenticated/app/leaderboard': {
+      id: '/_authenticated/app/leaderboard'
+      path: '/app/leaderboard'
+      fullPath: '/app/leaderboard'
+      preLoaderRoute: typeof AuthenticatedAppLeaderboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/predict': {
+      id: '/_authenticated/app/predict'
+      path: '/app/predict'
+      fullPath: '/app/predict'
+      preLoaderRoute: typeof AuthenticatedAppPredictRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/slots': {
+      id: '/_authenticated/app/slots'
+      path: '/app/slots'
+      fullPath: '/app/slots'
+      preLoaderRoute: typeof AuthenticatedAppSlotsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/spin': {
+      id: '/_authenticated/app/spin'
+      path: '/app/spin'
+      fullPath: '/app/spin'
+      preLoaderRoute: typeof AuthenticatedAppSpinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
