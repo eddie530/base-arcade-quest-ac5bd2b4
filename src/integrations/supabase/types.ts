@@ -59,12 +59,86 @@ export type Database = {
         }
         Relationships: []
       }
+      predict_markets: {
+        Row: {
+          cadence: string
+          category: string
+          closes_at: string
+          created_at: string
+          id: string
+          question: string
+          resolution: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          cadence?: string
+          category?: string
+          closes_at: string
+          created_at?: string
+          id: string
+          question: string
+          resolution?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          cadence?: string
+          category?: string
+          closes_at?: string
+          created_at?: string
+          id?: string
+          question?: string
+          resolution?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
+      predict_picks: {
+        Row: {
+          correct: boolean | null
+          created_at: string
+          id: string
+          market_id: string
+          side: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          market_id: string
+          side: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          market_id?: string
+          side?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predict_picks_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "predict_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
           last_claim_at: string | null
           last_flip_at: string | null
           last_spin_at: string | null
+          predict_correct: number
+          predict_resolved: number
+          predict_streak: number
           referral_code: string
           referred_by: string | null
           slot_bonus_spins: number
@@ -80,6 +154,9 @@ export type Database = {
           last_claim_at?: string | null
           last_flip_at?: string | null
           last_spin_at?: string | null
+          predict_correct?: number
+          predict_resolved?: number
+          predict_streak?: number
           referral_code?: string
           referred_by?: string | null
           slot_bonus_spins?: number
@@ -95,6 +172,9 @@ export type Database = {
           last_claim_at?: string | null
           last_flip_at?: string | null
           last_spin_at?: string | null
+          predict_correct?: number
+          predict_resolved?: number
+          predict_streak?: number
           referral_code?: string
           referred_by?: string | null
           slot_bonus_spins?: number
@@ -255,6 +335,10 @@ export type Database = {
         Args: { _delta: number; _user_id: string }
         Returns: undefined
       }
+      place_predict_pick: {
+        Args: { _market_id: string; _side: string; _user_id: string }
+        Returns: Json
+      }
       record_slot_spin: {
         Args: {
           _base_xp: number
@@ -267,6 +351,10 @@ export type Database = {
           _wins: Json
           _xp_cap: number
         }
+        Returns: Json
+      }
+      resolve_predict_market: {
+        Args: { _market_id: string; _outcome: string }
         Returns: Json
       }
     }
